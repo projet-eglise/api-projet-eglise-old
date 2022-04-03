@@ -16,6 +16,7 @@ declare(strict_types=1);
  */
 namespace App\Controller;
 
+use Cake\Core\Configure;
 use Cake\Event\EventInterface;
 
 /**
@@ -54,8 +55,18 @@ class ErrorController extends AppController
     public function beforeRender(EventInterface $event)
     {
         parent::beforeRender($event);
+        $viewBuilder = $event->getSubject()->viewBuilder();
 
-        $this->viewBuilder()->setTemplatePath('Error');
+        if(Configure::read('debug')) {
+            $data = [
+                'file' => $viewBuilder->getVar('file'),
+                'line' => $viewBuilder->getVar('line'),
+            ];
+        }
+
+        $data['error'] = $viewBuilder->getVar('message');
+
+        $this->apiResponse($viewBuilder->getVar('code'), $data);
     }
 
     /**
