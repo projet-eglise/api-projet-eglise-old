@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Middleware;
+
 use Cake\Http\Exception\UnauthorizedException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

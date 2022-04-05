@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace App;
 
-use AuthenticationMiddleware;
+use App\Middleware\AuthenticationMiddleware;
 use Cake\Core\Configure;
 use Cake\Core\ContainerInterface;
 use Cake\Datasource\FactoryLocator;
