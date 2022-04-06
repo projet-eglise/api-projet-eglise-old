@@ -50,7 +50,13 @@ return static function (RouteBuilder $routes) {
          * its action called 'display', and we pass a param to select the view file
          * to use (in this case, templates/Pages/home.php)...
          */
-        $builder->connect('/', ['controller' => 'Home', 'action' => 'index']);
+        $builder->connect('/login', ['controller' => 'Authentication', 'action' => 'login']);
+
+        $builder->scope('', function (RouteBuilder $protectedRoutes) {
+            $protectedRoutes->applyMiddleware('authentication');
+            $protectedRoutes->connect('/', ['controller' => 'Home', 'action' => 'index']);
+        });
+
 
         /*
          * Connect catchall routes for all controllers.
