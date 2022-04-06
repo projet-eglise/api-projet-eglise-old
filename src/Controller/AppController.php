@@ -57,17 +57,38 @@ class AppController extends Controller
     /**
      * Sends a json response with the variables you want to send.
      *
+     * @param array $data
+     */
+    protected function apiResponse(array $data = [])
+    {
+        $this->sendResponse(200, $data);
+    }
+
+    /**
+     * Sends an error response with the variables you want to send.
+     *
      * @param integer $statusCode
      * @param array $data
      */
-    protected function apiResponse(int $statusCode, array $data = [])
+    protected function errorResponse(int $code, array $data = [])
+    {
+        $this->sendResponse($code, $data);
+    }
+
+    /**
+     * Sends a json response with the variables you want to send.
+     *
+     * @param integer $statusCode
+     * @param array $data
+     */
+    private function sendResponse(int $statusCode, array $data = [])
     {
         $response['code'] = $statusCode;
         $response['message'] = (new Response(['status' => $statusCode]))->getReasonPhrase();
 
         $response = $statusCode === 200 ?
-            $this->okResponse($response, $data) :
-            $this->errorResponse($response, $data);
+            $this->okResponseBuilder($response, $data) :
+            $this->errorResponseBuilder($response, $data);
 
         $this->set($response);
 
@@ -83,7 +104,7 @@ class AppController extends Controller
      * @param array $data
      * @return array
      */
-    private function errorResponse(array $response, array $data = []): array
+    private function errorResponseBuilder(array $response, array $data = []): array
     {
         return array_merge($response, $data);
     }
@@ -95,7 +116,7 @@ class AppController extends Controller
      * @param array $data
      * @return array
      */
-    private function okResponse(array $response, array $data = []): array
+    private function okResponseBuilder(array $response, array $data = []): array
     {
         $response['data'] = $data;
         return $response;

@@ -47,6 +47,6 @@ class AuthenticationController extends AppController
             throw new UnauthorizedException('Bad password.');
         }
 
-        return $this->apiResponse(200, ['token' => $this->Authentication->generateJwt()]);
+        return $this->apiResponse(['token' => $this->Authentication->generateJwt()]);
     }
 }

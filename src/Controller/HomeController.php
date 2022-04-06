@@ -36,6 +36,6 @@ class HomeController extends AppController
      */
     public function index()
     {
-        $this->apiResponse(200, ['hello' => 'world']);
+        $this->apiResponse(['hello' => 'world']);
     }
 }

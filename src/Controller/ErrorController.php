@@ -66,7 +66,7 @@ class ErrorController extends AppController
 
         $data['error'] = $viewBuilder->getVar('message');
 
-        $this->apiResponse($viewBuilder->getVar('code'), $data);
+        $this->errorResponse($viewBuilder->getVar('code'), $data);
     }
 
     /**
