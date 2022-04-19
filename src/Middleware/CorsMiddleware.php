@@ -24,13 +24,14 @@ class CorsMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // Uncomment when the url of the front exists.
-        // header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Origin: *");
         header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
-        // header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Headers: *");
+
         if (strtoupper($request->getMethod()) === 'OPTIONS') {
             return (new Response([]))->withStatus(200);
         }
+
         return $handler->handle($request);
     }
 }
