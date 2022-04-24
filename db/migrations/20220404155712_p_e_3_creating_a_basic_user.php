@@ -18,7 +18,7 @@ final class PE3CreatingABasicUser extends AbstractMigration
      */
     public function change(): void
     {
-        $users = $this->table('users');
+        $users = $this->table('users', ['id' => false, 'primary_key' => 'user_id']);
         $users
             ->addColumn('email', 'string')
             ->addColumn('password', 'string')
