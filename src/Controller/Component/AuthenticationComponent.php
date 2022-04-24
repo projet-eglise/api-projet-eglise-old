@@ -40,7 +40,7 @@ class AuthenticationComponent extends Component
      */
     public function generateJwt(User $user, array $payload = []): string
     {
-        array_merge(['user_id' => $user->user_id], $payload);
+        array_merge(['user_id' => $user->user_id, 'church' => []], $payload);
         $payload['exp'] = time() + 3600;
         $headers_encoded = $this->base64urlEncode(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
         $payload_encoded = $this->base64urlEncode(json_encode($payload));
