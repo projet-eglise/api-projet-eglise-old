@@ -51,6 +51,7 @@ return static function (RouteBuilder $routes) {
          * to use (in this case, templates/Pages/home.php)...
          */
         $builder->connect('/login', ['controller' => 'Authentication', 'action' => 'login']);
+        $builder->connect('/signin', ['controller' => 'Authentication', 'action' => 'signin']);
 
         $builder->scope('', function (RouteBuilder $protectedRoutes) {
             $protectedRoutes->applyMiddleware('authentication');

@@ -37,18 +37,23 @@ class AuthenticationController extends AppController
         }
 
         $user = $this->UsersTable->findByEmail($email)->toArray();
-        if(count($user) !== 1) {
+        if (count($user) !== 1) {
             throw new NotFoundException('Identifiants invalide');
         }
 
         $user = $user[0];
 
-        if(!$this->Authentication->password_verify($password, $user->password)) {
+        if (!$this->Authentication->password_verify($password, $user->password)) {
             throw new UnauthorizedException('Identifiants invalide');
         }
 
         header("WWW-Authenticate: " . $this->Authentication->generateJwt());
 
+        return $this->apiResponse();
+    }
+
+    public function signin()
+    {
         return $this->apiResponse();
     }
 }
