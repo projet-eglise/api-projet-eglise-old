@@ -26,25 +26,25 @@ class AuthenticationController extends AppController
     public function login()
     {
         if (!$this->request->is('post')) {
-            throw new MethodNotAllowedException('Use POST method.');
+            throw new MethodNotAllowedException('Utilisez une requête POST');
         }
 
         $email = $this->request->getData('email');
         $password = $this->request->getData('password');
 
         if (is_null($email) || is_null($password)) {
-            throw new BadRequestException('Email or password empty.');
+            throw new BadRequestException('Email ou mot de passe vide');
         }
 
         $user = $this->UsersTable->findByEmail($email)->toArray();
         if(count($user) !== 1) {
-            throw new NotFoundException('Invalid email.');
+            throw new NotFoundException('Identifiants invalide');
         }
 
         $user = $user[0];
 
         if(!$this->Authentication->password_verify($password, $user->password)) {
-            throw new UnauthorizedException('Bad password.');
+            throw new UnauthorizedException('Identifiants invalide');
         }
 
         header("WWW-Authenticate: " . $this->Authentication->generateJwt());
