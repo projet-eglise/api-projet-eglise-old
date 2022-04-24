@@ -9,8 +9,14 @@ use Cake\ORM\Entity;
  * User Entity
  *
  * @property int $user_id
+ * @property string $uid
+ * @property string $firstname
+ * @property string $lastname
  * @property string $email
  * @property string $password
+ * @property string $phone_number
+ * @property \Cake\I18n\FrozenDate $birthdate
+ * @property bool $has_profile_picture
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime|null $updated_at
  */
@@ -26,8 +32,14 @@ class User extends Entity
      * @var array
      */
     protected $_accessible = [
+        'uid' => true,
+        'firstname' => true,
+        'lastname' => true,
         'email' => true,
         'password' => true,
+        'phone_number' => true,
+        'birthdate' => true,
+        'has_profile_picture' => true,
         'created_at' => true,
         'updated_at' => true,
     ];

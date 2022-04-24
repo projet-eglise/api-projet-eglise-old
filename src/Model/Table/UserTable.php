@@ -9,7 +9,7 @@ use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
 /**
- * Users Model
+ * User Model
  *
  * @method \App\Model\Entity\User newEmptyEntity()
  * @method \App\Model\Entity\User newEntity(array $data, array $options = [])
@@ -25,7 +25,7 @@ use Cake\Validation\Validator;
  * @method \App\Model\Entity\User[]|\Cake\Datasource\ResultSetInterface|false deleteMany(iterable $entities, $options = [])
  * @method \App\Model\Entity\User[]|\Cake\Datasource\ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
  */
-class UsersTable extends Table
+class UserTable extends Table
 {
     /**
      * Initialize method
@@ -55,6 +55,22 @@ class UsersTable extends Table
             ->allowEmptyString('user_id', null, 'create');
 
         $validator
+            ->scalar('uid')
+            ->maxLength('uid', 255)
+            ->requirePresence('uid', 'create')
+            ->notEmptyString('uid');
+
+        $validator
+            ->scalar('firstname')
+            ->maxLength('firstname', 255)
+            ->notEmptyString('firstname');
+
+        $validator
+            ->scalar('lastname')
+            ->maxLength('lastname', 255)
+            ->notEmptyString('lastname');
+
+        $validator
             ->email('email')
             ->requirePresence('email', 'create')
             ->notEmptyString('email');
@@ -66,6 +82,19 @@ class UsersTable extends Table
             ->notEmptyString('password');
 
         $validator
+            ->scalar('phone_number')
+            ->maxLength('phone_number', 255)
+            ->notEmptyString('phone_number');
+
+        $validator
+            ->date('birthdate')
+            ->notEmptyDate('birthdate');
+
+        $validator
+            ->boolean('has_profile_picture')
+            ->notEmptyFile('has_profile_picture');
+
+        $validator
             ->dateTime('created_at')
             ->notEmptyDateTime('created_at');
 
@@ -74,19 +103,5 @@ class UsersTable extends Table
             ->allowEmptyDateTime('updated_at');
 
         return $validator;
-    }
-
-    /**
-     * Returns a rules checker object that will be used for validating
-     * application integrity.
-     *
-     * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
-     * @return \Cake\ORM\RulesChecker
-     */
-    public function buildRules(RulesChecker $rules): RulesChecker
-    {
-        $rules->add($rules->isUnique(['email']), ['errorField' => 'email']);
-
-        return $rules;
     }
 }
