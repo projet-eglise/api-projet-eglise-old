@@ -2,6 +2,7 @@
 
 namespace App\Controller\Component;
 
+use App\Model\Entity\User;
 use Cake\Controller\Component;
 use Cake\Core\Configure;
 
@@ -14,19 +15,32 @@ class AuthenticationComponent extends Component
      * @param string $hashed_password
      * @return boolean
      */
-    public function password_verify(string $password, string $hashed_password): bool
+    public function passwordVerify(string $password, string $hashed_password): bool
     {
         return password_verify($password, $hashed_password);
     }
 
     /**
+     * Return hashed password.
+     *
+     * @param string $password
+     * @return string
+     */
+    public function hashPassword(string $password): string
+    {
+        return password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
+    }
+
+    /**
      * Transforms a payload into a JWT token.
      *
+     * @param User $user
      * @param array $payload
      * @return string
      */
-    public function generateJwt(array $payload = []): string
+    public function generateJwt(User $user, array $payload = []): string
     {
+        array_merge(['user_id' => $user->user_id], $payload);
         $payload['exp'] = time() + 3600;
         $headers_encoded = $this->base64urlEncode(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
         $payload_encoded = $this->base64urlEncode(json_encode($payload));
