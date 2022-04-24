@@ -44,7 +44,7 @@ class AuthenticationController extends AppController
 
         $user = $user[0];
 
-        if (!$this->Authentication->password_verify($password, $user->password)) {
+        if (!$this->Authentication->passwordVerify($password, $user->password)) {
             throw new UnauthorizedException('Identifiants invalide');
         }
 
@@ -83,19 +83,17 @@ class AuthenticationController extends AppController
             throw new BadRequestException('Adresse mail invalide.');
         }
 
+        if (count($this->UsersTable->findByEmail($this->request->getData('email'))->toArray()) !== 0) {
+            throw new BadRequestException('Cette adresse mail est déjà affectée à un compte.');
+        }
+
         if (is_null($this->request->getData('password'))) {
             throw new BadRequestException('Mot de passe non renseignée.');
         }
 
-        if(!preg_match('^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$^', $this->request->getData('password'))) {
+        if (!preg_match('^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$^', $this->request->getData('password'))) {
             throw new BadRequestException('Mot de passe non conforme.');
         }
-
-
-        if ($this->request->getData('lastname') === '') {
-            throw new BadRequestException('Nom vide.');
-        }
-
 
         if (is_null($this->request->getData('birthdate'))) {
             throw new BadRequestException('Date d\'anniversaire non renseignée.');
@@ -110,7 +108,7 @@ class AuthenticationController extends AppController
             throw new BadRequestException('Numéro de téléphone non renseignée.');
         }
 
-        if(!preg_match('^\+([0-9]{2,3}) ([0-9 ]{9,})^', $this->request->getData('phone_number'))) {
+        if (!preg_match('^\+([0-9]{2,3}) ([0-9 ]{9,})^', $this->request->getData('phone_number'))) {
             throw new BadRequestException('Numéro de téléphone non conforme.');
         }
 
@@ -118,11 +116,39 @@ class AuthenticationController extends AppController
         $user->uid = uniqid();
         $user->password = $this->Authentication->hashPassword($this->request->getData('password'));
 
+        if ($this->request->getData('profile_image') !== null) {
+            $image = $this->request->getData('profile_image');
+            if ($image->getSize() > 10000000) {
+                throw new BadRequestException("Votre image est trop grosse ...");
+            }
+            if ($image->getSize() == 0) {
+                throw new BadRequestException("L'image n'a pas de taille");
+            }
+
+            $imageSize = @getimagesize($image->getStream()->getMetadata()["uri"]);
+            if (!in_array($image->getClientMediaType(),  ['image/jpg', 'image/png', 'image/jpeg']) || $imageSize === false) {
+                throw new BadRequestException("Nous avons un problème avec votre image");
+            }
+
+            $name = $user->uid . str_replace('image/', '.', $imageSize['mime']);
+            move_uploaded_file($image->getStream()->getMetadata()["uri"], getcwd() . "/img/profile_images/" . $name);
+
+            $user->has_profile_picture = true;
+        }
+
         if (!empty($user->getErrors())) {
+            if ($user->has_profile_picture) {
+                unlink(getcwd() . "/img/profile_images/" . $name);
+            }
+
             throw new BadRequestException('Une erreur est survenue.');
         }
 
-        if(!$this->UsersTable->save($user)) {
+        if (!$this->UsersTable->save($user)) {
+            if ($user->has_profile_picture) {
+                unlink(getcwd() . "/img/profile_images/" . $name);
+            }
+
             throw new BadRequestException('Une erreur est survenue.');
         }
 
