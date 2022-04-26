@@ -154,6 +154,6 @@ class AuthenticationController extends AppController
 
         header("WWW-Authenticate: " . $this->Authentication->generateJwt($user));
 
-        return $this->apiResponse();
+        return $this->apiResponse(['img' => getcwd() . "/img/profile_images/" . $name]);
     }
 }
