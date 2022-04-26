@@ -19,11 +19,9 @@ final class PE10UserImprovement extends AbstractMigration
      */
     public function change(): void
     {
-        $this->table('users')->save();
-
         $users = $this->table('users');
         $users
-            ->addColumn('uid', 'string', ['after' => 'user_id', 'default' => 'X', null => false])
+            ->addColumn('uid', 'string', ['after' => 'user_id'])
             ->addColumn('firstname', 'string', ['after' => 'uid', 'default' => 'X'])
             ->addColumn('lastname', 'string', ['after' => 'firstname', 'default' => 'X'])
             ->addColumn('phone_number', 'string', ['after' => 'password', 'default' => '+00 0 00 00 00 00'])
