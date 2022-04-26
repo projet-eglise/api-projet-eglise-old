@@ -131,26 +131,16 @@ class AuthenticationController extends AppController
                 throw new BadRequestException("Nous avons un problème avec votre image");
             }
 
-            $name = $user->uid . str_replace('image/', '.', $imageSize['mime']);
-
             $user->profile_image_link = $this->File->upload($image->getStream()->getMetadata()["uri"]);
-            debug($user);die;
+
             $user->has_profile_picture = true;
         }
 
         if (!empty($user->getErrors())) {
-            if ($user->has_profile_picture) {
-                unlink(getcwd() . "/img/profile_images-" . $name);
-            }
-
             throw new BadRequestException('Une erreur est survenue.');
         }
 
         if (!$this->UsersTable->save($user)) {
-            if ($user->has_profile_picture) {
-                unlink(getcwd() . "/img/profile_images-" . $name);
-            }
-
             throw new BadRequestException('Une erreur est survenue.');
         }
 
