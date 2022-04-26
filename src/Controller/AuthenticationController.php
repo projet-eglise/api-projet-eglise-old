@@ -134,7 +134,7 @@ class AuthenticationController extends AppController
             $name = $user->uid . str_replace('image/', '.', $imageSize['mime']);
 
             $user->profile_image_link = $this->File->upload($image->getStream()->getMetadata()["uri"]);
-
+            debug($user);die;
             $user->has_profile_picture = true;
         }
 

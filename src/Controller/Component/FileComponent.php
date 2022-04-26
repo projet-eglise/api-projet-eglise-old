@@ -35,8 +35,6 @@ class FileComponent extends Component
     public function upload(string $fileLink): string
     {
         $file = $this->filestackClient->upload($fileLink);
-        print_r($file->url());
-        print_r($file);
         return $file->url();
     }
 }
