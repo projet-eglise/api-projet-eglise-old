@@ -131,7 +131,11 @@ class AuthenticationController extends AppController
             }
 
             $name = $user->uid . str_replace('image/', '.', $imageSize['mime']);
-            move_uploaded_file($image->getStream()->getMetadata()["uri"], getcwd() . "/img/profile_images/" . $name);
+            if(move_uploaded_file($image->getStream()->getMetadata()["uri"], getcwd() . "/img/profile_images/" . $name)) {
+                echo 'uploaded';
+            } else {
+                echo 'error when upload';
+            }
 
             $user->has_profile_picture = true;
         }
@@ -144,13 +148,13 @@ class AuthenticationController extends AppController
             throw new BadRequestException('Une erreur est survenue.');
         }
 
-        if (!$this->UsersTable->save($user)) {
-            if ($user->has_profile_picture) {
-                unlink(getcwd() . "/img/profile_images/" . $name);
-            }
+        // if (!$this->UsersTable->save($user)) {
+        //     if ($user->has_profile_picture) {
+        //         unlink(getcwd() . "/img/profile_images/" . $name);
+        //     }
 
-            throw new BadRequestException('Une erreur est survenue.');
-        }
+        //     throw new BadRequestException('Une erreur est survenue.');
+        // }
 
         header("WWW-Authenticate: " . $this->Authentication->generateJwt($user));
 
