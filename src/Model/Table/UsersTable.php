@@ -95,6 +95,11 @@ class UsersTable extends Table
             ->notEmptyFile('has_profile_picture');
 
         $validator
+            ->scalar('profile_image_link')
+            ->maxLength('profile_image_link', 255)
+            ->allowEmptyFile('profile_image_link');
+
+        $validator
             ->dateTime('created_at')
             ->notEmptyDateTime('created_at');
 

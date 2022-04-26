@@ -418,4 +418,6 @@ return [
     'Session' => [
         'defaults' => 'php',
     ],
+
+    'FilestackApiKey' => env('FILESTACK_API_KEY', ''),
 ];

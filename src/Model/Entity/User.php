@@ -17,6 +17,7 @@ use Cake\ORM\Entity;
  * @property string $phone_number
  * @property \Cake\I18n\FrozenDate $birthdate
  * @property bool $has_profile_picture
+ * @property string|null $profile_image_link
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime|null $updated_at
  */
@@ -40,6 +41,7 @@ class User extends Entity
         'phone_number' => true,
         'birthdate' => true,
         'has_profile_picture' => true,
+        'profile_image_link' => true,
         'created_at' => true,
         'updated_at' => true,
     ];

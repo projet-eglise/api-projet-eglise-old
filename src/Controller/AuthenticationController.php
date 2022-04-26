@@ -20,6 +20,7 @@ class AuthenticationController extends AppController
     {
         parent::initialize();
         $this->loadComponent('Authentication');
+        $this->loadComponent('File');
 
         $this->UsersTable = TableRegistry::getTableLocator()->get('Users');
     }
@@ -131,14 +132,15 @@ class AuthenticationController extends AppController
             }
 
             $name = $user->uid . str_replace('image/', '.', $imageSize['mime']);
-            move_uploaded_file($image->getStream()->getMetadata()["uri"], getcwd() . "/img/profile_images/" . $name);
+
+            $user->profile_image_link = $this->File->upload($image->getStream()->getMetadata()["uri"]);
 
             $user->has_profile_picture = true;
         }
 
         if (!empty($user->getErrors())) {
             if ($user->has_profile_picture) {
-                unlink(getcwd() . "/img/profile_images/" . $name);
+                unlink(getcwd() . "/img/profile_images-" . $name);
             }
 
             throw new BadRequestException('Une erreur est survenue.');
@@ -146,7 +148,7 @@ class AuthenticationController extends AppController
 
         if (!$this->UsersTable->save($user)) {
             if ($user->has_profile_picture) {
-                unlink(getcwd() . "/img/profile_images/" . $name);
+                unlink(getcwd() . "/img/profile_images-" . $name);
             }
 
             throw new BadRequestException('Une erreur est survenue.');
