@@ -49,9 +49,7 @@ class AuthenticationController extends AppController
             throw new UnauthorizedException('Identifiants invalide');
         }
 
-        header("WWW-Authenticate: " . $this->Authentication->generateJwt($user));
-
-        return $this->apiResponse();
+        return $this->apiResponse(['token' => $this->Authentication->generateJwt($user)]);
     }
 
     public function signin()
