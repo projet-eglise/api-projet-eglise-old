@@ -144,8 +144,6 @@ class AuthenticationController extends AppController
             throw new BadRequestException('Une erreur est survenue.');
         }
 
-        header("WWW-Authenticate: " . $this->Authentication->generateJwt($user));
-
-        return $this->apiResponse();
+        return $this->apiResponse(['token' => $this->Authentication->generateJwt($user)]);
     }
 }
