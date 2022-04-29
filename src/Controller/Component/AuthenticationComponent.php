@@ -5,6 +5,7 @@ namespace App\Controller\Component;
 use App\Model\Entity\User;
 use Cake\Controller\Component;
 use Cake\Core\Configure;
+use Cake\ORM\TableRegistry;
 
 class AuthenticationComponent extends Component
 {
@@ -40,7 +41,26 @@ class AuthenticationComponent extends Component
      */
     public function generateJwt(User $user, array $payload = []): string
     {
-        $payload = array_merge(['user_id' => $user->user_id, 'church' => []], $payload);
+        $Users = TableRegistry::getTableLocator()->get('Users');
+        $user = $Users->get($user->user_id, [
+            'fields' => ['user_id', 'uid', 'is_admin'],
+            'contain' => [
+                'Churches' => [
+                    'fields' => ['church_id', 'uid', 'name'],
+                ]
+            ]
+        ]);
+        $churches = $user->churches;
+        
+        foreach ($churches as $church) {
+            unset($church->church_id);
+            unset($church->_joinData);
+        }
+
+        unset($user->churches);
+        unset($user->user_id);
+
+        $payload = array_merge(['user' => $user, 'churches' => $churches], $payload);
         $payload['exp'] = time() + 3600;
         $headers_encoded = $this->base64urlEncode(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
         $payload_encoded = $this->base64urlEncode(json_encode($payload));
