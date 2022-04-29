@@ -15,52 +15,46 @@ class PE14ChurchesSeeder extends AbstractSeed
      */
     public function run()
     {
-        $churches = [
+        $churches = $this->table('churches');
+        $churches->insert([
             [
                 'church_id' => 1,
                 'name' => 'ADD Dijon',
                 'uid' => uniqid(),
                 'pastor_id' => 2,
                 'main_administrator_id' => 2,
-                'created' => date('Y-m-d H:i:s'),
             ], [
                 'church_id' => 2,
                 'name' => 'ADD Autun',
                 'uid' => uniqid(),
                 'pastor_id' => 1,
                 'main_administrator_id' => 1,
-                'created' => date('Y-m-d H:i:s'),
             ]
-        ];
-
-        $churches = $this->table('churches');
-        $churches->insert($churches)
+        ])
             ->saveData();
 
 
-        $church_users = [
+        $church_users = $this->table('church_users');
+        $church_users->insert($church_users = [
             [
+                'church_user_id' => 1,
                 'user_id' => 1,
                 'church_id' => 1,
-                'created' => date('Y-m-d H:i:s'),
             ], [
+                'church_user_id' => 2,
                 'user_id' => 2,
                 'church_id' => 1,
-                'created' => date('Y-m-d H:i:s'),
             ],
             [
+                'church_user_id' => 3,
                 'user_id' => 1,
                 'church_id' => 2,
-                'created' => date('Y-m-d H:i:s'),
             ], [
+                'church_user_id' => 4,
                 'user_id' => 2,
                 'church_id' => 2,
-                'created' => date('Y-m-d H:i:s'),
             ]
-        ];
-
-        $church_users = $this->table('church_users');
-        $church_users->insert($church_users)
+        ])
             ->saveData();
     }
 }

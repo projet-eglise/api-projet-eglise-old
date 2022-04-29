@@ -21,11 +21,11 @@ final class PE10UserImprovement extends AbstractMigration
     {
         $users = $this->table('users');
         $users
-            ->addColumn('uid', 'string', ['after' => 'user_id', 'default' => 'setUidPlease'])
-            ->addColumn('firstname', 'string', ['after' => 'uid', 'default' => 'X'])
-            ->addColumn('lastname', 'string', ['after' => 'firstname', 'default' => 'X'])
-            ->addColumn('phone_number', 'string', ['after' => 'password', 'default' => '+00 0 00 00 00 00'])
-            ->addColumn('birthdate', 'date', ['after' => 'phone_number', 'default' => '1900-01-01'])
+            ->addColumn('uid', 'string', ['after' => 'user_id'])
+            ->addColumn('firstname', 'string', ['after' => 'uid'])
+            ->addColumn('lastname', 'string', ['after' => 'firstname'])
+            ->addColumn('phone_number', 'string', ['after' => 'password'])
+            ->addColumn('birthdate', 'date', ['after' => 'phone_number'])
             ->addColumn('has_profile_picture', 'boolean', ['after' => 'birthdate', 'default' => false])
             ->update();
     }

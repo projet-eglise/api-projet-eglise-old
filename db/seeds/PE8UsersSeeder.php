@@ -15,7 +15,8 @@ class PE8UsersSeeder extends AbstractSeed
      */
     public function run()
     {
-        $users = [
+        $users = $this->table('users');
+        $users->insert([
             [
                 'user_id' => 1,
                 'uid' => '626554417f45e',
@@ -28,7 +29,6 @@ class PE8UsersSeeder extends AbstractSeed
                 'birthdate' => '1987-03-03',
                 'has_profile_picture' => true,
                 'profile_image_link' => 'https://cdn.filestackcontent.com/dOM9FGJpTiWXuqVp0uHI',
-                'created' => date('Y-m-d H:i:s'),
             ], [
                 'user_id' => 2,
                 'uid' => '6265545515f21',
@@ -41,12 +41,8 @@ class PE8UsersSeeder extends AbstractSeed
                 'birthdate' => '2001-04-11',
                 'has_profile_picture' => true,
                 'profile_image_link' => 'https://cdn.filestackcontent.com/l92jeAdTeusVOZzNLxiw',
-                'created' => date('Y-m-d H:i:s'),
             ]
-        ];
-
-        $users = $this->table('users');
-        $users->insert($users)
+        ])
             ->saveData();
     }
 }
