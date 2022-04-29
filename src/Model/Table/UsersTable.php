@@ -40,6 +40,14 @@ class UsersTable extends Table
         $this->setTable('users');
         $this->setDisplayField('user_id');
         $this->setPrimaryKey('user_id');
+
+        $this->belongsToMany('Churches', [
+            'through' => 'ChurchUsers',
+            'foreignKey' => 'user_id',
+            'targetForeignKey' => 'church_id',
+            'joinTable' => 'church_users',
+            'joinType' => 'INNER',
+        ]);
     }
 
     /**

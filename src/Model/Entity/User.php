@@ -20,6 +20,8 @@ use Cake\ORM\Entity;
  * @property string|null $profile_image_link
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime|null $updated_at
+ * 
+ * @property \App\Model\Entity\Church[] $churches
  */
 class User extends Entity
 {
