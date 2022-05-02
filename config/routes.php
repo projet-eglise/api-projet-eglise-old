@@ -50,12 +50,12 @@ return static function (RouteBuilder $routes) {
          * its action called 'display', and we pass a param to select the view file
          * to use (in this case, templates/Pages/home.php)...
          */
-        $builder->connect('/login', ['controller' => 'Authentication', 'action' => 'login']);
-        $builder->connect('/signin', ['controller' => 'Authentication', 'action' => 'signin']);
+        $builder->post('/login', ['controller' => 'Authentication', 'action' => 'login']);
+        $builder->post('/signin', ['controller' => 'Authentication', 'action' => 'signin']);
 
         $builder->scope('', function (RouteBuilder $protectedRoutes) {
             $protectedRoutes->applyMiddleware('authentication');
-            $protectedRoutes->connect('/church/add', ['controller' => 'Churches', 'action' => 'add']);
+            $protectedRoutes->post('/church/add', ['controller' => 'Churches', 'action' => 'add']);
         });
 
 
