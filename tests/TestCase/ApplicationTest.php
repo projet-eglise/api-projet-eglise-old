@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace App\Test\TestCase;
 
 use App\Application;
+use App\Middleware\CorsMiddleware;
 use Cake\Error\Middleware\ErrorHandlerMiddleware;
 use Cake\Http\MiddlewareQueue;
 use Cake\Routing\Middleware\AssetMiddleware;
@@ -41,7 +42,6 @@ class ApplicationTest extends IntegrationTestCase
         $plugins = $app->getPlugins();
 
         $this->assertTrue($plugins->has('Bake'), 'plugins has Bake');
-        $this->assertTrue($plugins->has('DebugKit'), 'plugins has DebugKit');
         $this->assertTrue($plugins->has('Migrations'), 'plugins has Migrations');
     }
 
@@ -81,6 +81,8 @@ class ApplicationTest extends IntegrationTestCase
         $middleware->seek(1);
         $this->assertInstanceOf(AssetMiddleware::class, $middleware->current());
         $middleware->seek(2);
+        $this->assertInstanceOf(CorsMiddleware::class, $middleware->current());
+        $middleware->seek(3);
         $this->assertInstanceOf(RoutingMiddleware::class, $middleware->current());
     }
 }

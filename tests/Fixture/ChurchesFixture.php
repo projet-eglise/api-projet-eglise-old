@@ -20,13 +20,17 @@ class ChurchesFixture extends TestFixture
         $this->records = [
             [
                 'church_id' => 1,
-                'name' => 'Lorem ipsum dolor sit amet',
-                'uid' => 'Lorem ipsum dolor sit amet',
+                'name' => 'ADD Dijon',
+                'uid' =>'627041d90c74f',
+                'pastor_id' => 2,
+                'main_administrator_id' => 2,
+            ], [
+                'church_id' => 2,
+                'name' => 'ADD Autun',
+                'uid' => '627041d90c752',
                 'pastor_id' => 1,
                 'main_administrator_id' => 1,
-                'created_at' => 1651505893,
-                'updated_at' => 1651505893,
-            ],
+            ]
         ];
         parent::init();
     }
