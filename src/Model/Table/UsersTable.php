@@ -44,8 +44,7 @@ class UsersTable extends Table
         $this->belongsToMany('Churches', [
             'through' => 'ChurchUsers',
             'foreignKey' => 'user_id',
-            'targetForeignKey' => 'church_id',
-            'joinTable' => 'church_users',
+            'joinTable' => 'ChurchUsers',
             'joinType' => 'INNER',
         ]);
     }

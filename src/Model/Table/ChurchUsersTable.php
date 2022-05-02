@@ -43,15 +43,6 @@ class ChurchUsersTable extends Table
         $this->setTable('church_users');
         $this->setDisplayField('church_user_id');
         $this->setPrimaryKey('church_user_id');
-
-        $this->belongsTo('Users', [
-            'foreignKey' => 'user_id',
-            'joinType' => 'INNER',
-        ]);
-        $this->belongsTo('Churches', [
-            'foreignKey' => 'church_id',
-            'joinType' => 'INNER',
-        ]);
     }
 
     /**
@@ -86,9 +77,6 @@ class ChurchUsersTable extends Table
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->existsIn('user_id', 'Users'), ['errorField' => 'user_id']);
-        $rules->add($rules->existsIn('church_id', 'Churches'), ['errorField' => 'church_id']);
-
         return $rules;
     }
 }

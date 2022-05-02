@@ -58,8 +58,7 @@ class ChurchesTable extends Table
         $this->belongsToMany('Users', [
             'through' => 'ChurchUsers',
             'foreignKey' => 'church_id',
-            'targetForeignKey' => 'user_id',
-            'joinTable' => 'church_users',
+            'joinTable' => 'ChurchUsers',
             'joinType' => 'INNER',
         ]);
     }
@@ -108,9 +107,6 @@ class ChurchesTable extends Table
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->existsIn('pastor_id', 'Users'), ['errorField' => 'pastor_id']);
-        $rules->add($rules->existsIn('main_administrator_id', 'Users'), ['errorField' => 'main_administrator_id']);
-
         return $rules;
     }
 }

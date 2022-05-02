@@ -55,7 +55,7 @@ return static function (RouteBuilder $routes) {
 
         $builder->scope('', function (RouteBuilder $protectedRoutes) {
             $protectedRoutes->applyMiddleware('authentication');
-            $protectedRoutes->connect('/', ['controller' => 'Home', 'action' => 'index']);
+            $protectedRoutes->connect('/church/add', ['controller' => 'Churches', 'action' => 'add']);
         });
 
 

@@ -15,8 +15,6 @@ class AuthenticationMiddleware implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $access = true;
-
         $authorizationHeader = $request->getHeader('AUTHORIZATION')[0] ?? '';
         if ($authorizationHeader === '') {
             throw new UnauthorizedException('No authorization header.');
@@ -32,6 +30,8 @@ class AuthenticationMiddleware implements MiddlewareInterface
         if (!$Authentication->checkJwt($token)) {
             throw new UnauthorizedException('Use the token you were given.');
         }
+
+        $request->getSession()->write('token', $token);
 
         return $handler->handle($request);
     }

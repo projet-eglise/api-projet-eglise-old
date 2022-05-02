@@ -10,6 +10,7 @@ use Cake\ORM\Entity;
  *
  * @property int $user_id
  * @property string $uid
+ * @property bool $is_admin
  * @property string $firstname
  * @property string $lastname
  * @property string $email
@@ -20,8 +21,6 @@ use Cake\ORM\Entity;
  * @property string|null $profile_image_link
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime|null $updated_at
- * 
- * @property \App\Model\Entity\Church[] $churches
  */
 class User extends Entity
 {
@@ -36,6 +35,7 @@ class User extends Entity
      */
     protected $_accessible = [
         'uid' => true,
+        'is_admin' => true,
         'firstname' => true,
         'lastname' => true,
         'email' => true,

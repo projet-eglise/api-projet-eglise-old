@@ -18,8 +18,10 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Model\Table\UsersTable;
 use Cake\Controller\Controller;
 use Cake\Http\Response;
+use Cake\ORM\TableRegistry;
 
 /**
  * Application Controller
@@ -31,6 +33,8 @@ use Cake\Http\Response;
  */
 class AppController extends Controller
 {
+    private UsersTable $Users;
+
     /**
      * Initialization hook method.
      *
@@ -46,6 +50,10 @@ class AppController extends Controller
 
         $this->loadComponent('RequestHandler');
         $this->loadComponent('Flash');
+        $this->loadComponent('Authentication');
+
+        $this->Users = TableRegistry::getTableLocator()->get('Users');
+
 
         /*
          * Enable the following component for recommended CakePHP form protection settings.
@@ -120,5 +128,15 @@ class AppController extends Controller
     {
         $response['data'] = $data;
         return $response;
+    }
+
+    /**
+     * Returns the id of the connected user.
+     *
+     * @return integer
+     */
+    protected function getUserId(): int
+    {
+        return $this->Users->findByUid($this->Authentication->getTokenContent($this->request->getSession()->read('token'))['user']['uid'])->toArray()[0]->user_id;
     }
 }

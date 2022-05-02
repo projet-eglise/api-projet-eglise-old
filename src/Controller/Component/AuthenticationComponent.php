@@ -10,6 +10,17 @@ use Cake\ORM\TableRegistry;
 class AuthenticationComponent extends Component
 {
     /**
+     * Return content of a token
+     *
+     * @return array
+     */
+    public function getTokenContent(string $token): array
+    {
+        $tokenParts = explode('.', $token);
+        return json_decode(base64_decode($tokenParts[1]), true);
+    }
+
+    /**
      * Checks if a password and a hashed password match.
      *
      * @param string $password
@@ -49,7 +60,7 @@ class AuthenticationComponent extends Component
                     'fields' => ['church_id', 'uid', 'name'],
                 ]
             ]
-        ]);
+        ]);   
         $churches = $user->churches;
         
         foreach ($churches as $church) {

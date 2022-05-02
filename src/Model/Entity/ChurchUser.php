@@ -13,9 +13,6 @@ use Cake\ORM\Entity;
  * @property int $church_id
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime|null $updated_at
- *
- * @property \App\Model\Entity\User $user
- * @property \App\Model\Entity\Church $church
  */
 class ChurchUser extends Entity
 {
@@ -33,7 +30,5 @@ class ChurchUser extends Entity
         'church_id' => true,
         'created_at' => true,
         'updated_at' => true,
-        'user' => true,
-        'church' => true,
     ];
 }
