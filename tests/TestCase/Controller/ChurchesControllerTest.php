@@ -71,9 +71,13 @@ class ChurchesControllerTest extends TestCase
         unset($church['addres']['created_at']);
         unset($church['addres']['updated_at']);
         unset($church['main_administrator']['user_id']);
+        unset($church['main_administrator']['is_admin']);
+        unset($church['main_administrator']['birthdate']);
         unset($church['main_administrator']['created_at']);
         unset($church['main_administrator']['updated_at']);
         unset($church['pastor']['user_id']);
+        unset($church['pastor']['is_admin']);
+        unset($church['pastor']['birthdate']);
         unset($church['pastor']['created_at']);
         unset($church['pastor']['updated_at']);
 

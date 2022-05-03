@@ -49,23 +49,19 @@ class ChurchesController extends AppController
             'contain' => [
                 'Pastor' => ['fields' => [
                     'uid',
-                    'is_admin',
                     'firstname',
                     'lastname',
                     'email',
                     'phone_number',
-                    'birthdate',
                     'has_profile_picture',
                     'profile_image_link',
                 ]],
                 'MainAdministrator' => ['fields' => [
                     'uid',
-                    'is_admin',
                     'firstname',
                     'lastname',
                     'email',
                     'phone_number',
-                    'birthdate',
                     'has_profile_picture',
                     'profile_image_link',
                 ]],
