@@ -62,7 +62,6 @@ class ChurchesController extends AppController
         if (!filter_var($this->request->getData('pastor_email'), FILTER_VALIDATE_EMAIL))
             throw new BadRequestException('Adresse mail du responsable invalide.');
 
-        // TODO Check if administrator mail == pastor mail
         $existingUser = $this->Users->findByEmail($this->request->getData('pastor_email'))->toArray();
         $pastorIsAdmin = isset($existingUser[0]) && $existingUser[0]->email === $this->request->getData('pastor_email');
         if (count($existingUser) !== 0 && !$pastorIsAdmin)
@@ -151,6 +150,6 @@ class ChurchesController extends AppController
         if (!$this->ChurchUsers->save($churchMainAdministrator, ['associated' => false]))
             throw new InternalErrorException("Une erreur est survenu lors de l'ajout de l'Eglise.\n");
 
-        $this->apiResponse(['pastor' => $pastor, 'church' => $church, 'churchPastor' => $churchPastor, 'churchMainAdministrator' => $churchMainAdministrator]);
+        $this->apiResponse(['church' => $this->Churches->get($church->church_id, ['contain' => ['Pastor', 'MainAdministrator', 'Users']])]);
     }
 }
