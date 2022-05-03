@@ -37,6 +37,46 @@ class ChurchesController extends AppController
     }
 
     /**
+     * View method
+     *
+     * @param string|null $churchUid
+     */
+    public function view(string $churchUid = null)
+    {
+        $church = $this->Churches->findByUid($churchUid ?? $this->request->getParam('uid'), ['fields' => ['church_id']])->toArray()[0];
+        $church = $this->Churches->get($church->church_id, [
+            'fields' => ['uid', 'name'],
+            'contain' => [
+                'Pastor' => ['fields' => [
+                    'uid',
+                    'is_admin',
+                    'firstname',
+                    'lastname',
+                    'email',
+                    'phone_number',
+                    'birthdate',
+                    'has_profile_picture',
+                    'profile_image_link',
+                ]],
+                'MainAdministrator' => ['fields' => [
+                    'uid',
+                    'is_admin',
+                    'firstname',
+                    'lastname',
+                    'email',
+                    'phone_number',
+                    'birthdate',
+                    'has_profile_picture',
+                    'profile_image_link',
+                ]],
+                'Address' => ['fields' => ['uid', 'address', 'postal_code', 'city']]
+            ]
+        ]);
+
+        return $this->apiResponse(['church' => $church]);
+    }
+
+    /**
      * Add method
      *
      * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
@@ -167,6 +207,6 @@ class ChurchesController extends AppController
         if (!$this->ChurchUsers->save($churchMainAdministrator, ['associated' => false]))
             throw new InternalErrorException("Une erreur est survenu lors de l'ajout de l'Eglise.\n");
 
-        $this->apiResponse(['church' => $this->Churches->get($church->church_id, ['contain' => ['Pastor', 'MainAdministrator', 'Address']])]);
+        return $this->view($church->uid);
     }
 }

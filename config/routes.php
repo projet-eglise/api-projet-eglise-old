@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Routes configuration.
  *
@@ -55,6 +56,11 @@ return static function (RouteBuilder $routes) {
 
         $builder->scope('', function (RouteBuilder $protectedRoutes) {
             $protectedRoutes->applyMiddleware('authentication');
+
+            $protectedRoutes
+                ->get('/church/{uid}', ['controller' => 'Churches', 'action' => 'view'])
+                ->setPatterns(['uid' => '[a-z0-9]+']);
+
             $protectedRoutes->post('/church/add', ['controller' => 'Churches', 'action' => 'add']);
         });
 
