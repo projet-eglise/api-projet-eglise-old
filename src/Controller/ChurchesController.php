@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Model\Table\AddressesTable;
 use App\Model\Table\ChurchUsersTable;
 use App\Model\Table\UsersTable;
 use Cake\Http\Exception\BadRequestException;
@@ -20,6 +21,7 @@ use Cake\ORM\TableRegistry;
  */
 class ChurchesController extends AppController
 {
+    private AddressesTable $Addresses;
     private ChurchUsersTable $ChurchUsers;
     private UsersTable $Users;
 
@@ -29,6 +31,7 @@ class ChurchesController extends AppController
         $this->loadComponent('Authentication');
         $this->loadComponent('File');
 
+        $this->Addresses = TableRegistry::getTableLocator()->get('Addresses');
         $this->ChurchUsers = TableRegistry::getTableLocator()->get('ChurchUsers');
         $this->Users = TableRegistry::getTableLocator()->get('Users');
     }
@@ -111,18 +114,32 @@ class ChurchesController extends AppController
         $church = $this->Churches->newEntity([
             'uid' => uniqid(),
             'name' => $this->request->getData('church_name'),
-            'pastor_id' => 1,
+            'pastor_id' => $pastor->user_id,
             'main_administrator_id' => $this->getUserId(),
         ]);
 
         if (count($church->getErrors()) > 0)
             throw new HttpException("Une erreur est survenu lors de la création de l'Eglise.\n" . json_encode($church->getErrors()), 422);
 
+        $address = $this->Addresses->newEntity([
+            'uid' => uniqid(),
+            'address' => $this->request->getData('church_address'),
+            'postal_code' => $this->request->getData('church_postal_code'),
+            'city' => $this->request->getData('church_city'),
+        ]);
+
+        if (count($church->getErrors()) > 0)
+            throw new HttpException("Une erreur est survenu lors de la création de l'adresse de l'Eglise.\n" . json_encode($church->getErrors()), 422);
+
         if (!$pastorIsAdmin)
             if (!$this->Users->save($pastor))
                 throw new InternalErrorException("Une erreur est survenu lors de l'ajout du pasteur.\n");
 
+        if (!$this->Addresses->save($address, ['associated' => false]))
+            throw new InternalErrorException("Une erreur est survenu lors de l'ajout de l'adresse de l'Eglise.\n");
+
         $church->pastor_id = $pastor->user_id;
+        $church->address_id = $address->address_id;
 
         if (!$this->Churches->save($church, ['associated' => false]))
             throw new InternalErrorException("Une erreur est survenu lors de l'ajout de l'Eglise.\n");
@@ -150,6 +167,6 @@ class ChurchesController extends AppController
         if (!$this->ChurchUsers->save($churchMainAdministrator, ['associated' => false]))
             throw new InternalErrorException("Une erreur est survenu lors de l'ajout de l'Eglise.\n");
 
-        $this->apiResponse(['church' => $this->Churches->get($church->church_id, ['contain' => ['Pastor', 'MainAdministrator', 'Users']])]);
+        $this->apiResponse(['church' => $this->Churches->get($church->church_id, ['contain' => ['Pastor', 'MainAdministrator', 'Address']])]);
     }
 }

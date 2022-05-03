@@ -21,8 +21,8 @@ final class PE11NotionOfChurch extends AbstractMigration
     {
         $churches = $this->table('churches', ['id' => 'church_id']);
         $churches
-            ->addColumn('name', 'string')
             ->addColumn('uid', 'string')
+            ->addColumn('name', 'string')
             ->addColumn('pastor_id', 'integer')
             ->addColumn('main_administrator_id', 'integer')
             ->addTimestamps()

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model\Table;
@@ -49,6 +50,7 @@ class ChurchesTable extends Table
             'joinType' => 'INNER',
             'className' => 'Users',
         ]);
+
         $this->belongsTo('MainAdministrator', [
             'foreignKey' => 'main_administrator_id',
             'joinType' => 'INNER',
@@ -60,6 +62,11 @@ class ChurchesTable extends Table
             'foreignKey' => 'church_id',
             'joinTable' => 'ChurchUsers',
             'joinType' => 'INNER',
+        ]);
+
+        $this->hasOne('Address', [
+            'className' => 'Addresses',
+            'foreignKey' => 'address_id',
         ]);
     }
 
@@ -76,16 +83,16 @@ class ChurchesTable extends Table
             ->allowEmptyString('church_id', null, 'create');
 
         $validator
-            ->scalar('name')
-            ->maxLength('name', 255)
-            ->requirePresence('name', 'create')
-            ->notEmptyString('name');
-
-        $validator
             ->scalar('uid')
             ->maxLength('uid', 255)
             ->requirePresence('uid', 'create')
             ->notEmptyString('uid');
+
+        $validator
+            ->scalar('name')
+            ->maxLength('name', 255)
+            ->requirePresence('name', 'create')
+            ->notEmptyString('name');
 
         $validator
             ->dateTime('created_at')

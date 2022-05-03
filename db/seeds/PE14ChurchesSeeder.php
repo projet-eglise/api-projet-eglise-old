@@ -5,6 +5,11 @@ use Phinx\Seed\AbstractSeed;
 
 class PE14ChurchesSeeder extends AbstractSeed
 {
+    public function getDependencies()
+    {
+        return ['PE8UsersSeeder', 'PE29AddressesSeeder'];
+    }
+
     /**
      * Run Method.
      *
@@ -23,12 +28,14 @@ class PE14ChurchesSeeder extends AbstractSeed
                 'uid' => uniqid(),
                 'pastor_id' => 2,
                 'main_administrator_id' => 2,
+                'address_id' => 1,
             ], [
                 'church_id' => 2,
                 'name' => 'ADD Autun',
                 'uid' => uniqid(),
                 'pastor_id' => 1,
                 'main_administrator_id' => 1,
+                'address_id' => 2,
             ]
         ])
             ->saveData();

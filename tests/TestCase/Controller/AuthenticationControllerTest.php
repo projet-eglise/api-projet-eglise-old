@@ -19,7 +19,7 @@ class AuthenticationControllerTest extends TestCase
 {
     use IntegrationTestTrait;
 
-    protected $fixtures = ['app.Users', 'app.Churches', 'app.ChurchUsers'];
+    protected $fixtures = ['app.Users', 'app.Addresses', 'app.Churches', 'app.ChurchUsers'];
 
     public function setUp(): void
     {

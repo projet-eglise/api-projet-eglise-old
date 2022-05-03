@@ -20,12 +20,14 @@ class ChurchesFixture extends TestFixture
         $this->records = [
             [
                 'church_id' => 1,
+                'address_id' => 1,
                 'name' => 'ADD Dijon',
                 'uid' =>'627041d90c74f',
                 'pastor_id' => 2,
                 'main_administrator_id' => 2,
             ], [
                 'church_id' => 2,
+                'address_id' => 2,
                 'name' => 'ADD Autun',
                 'uid' => '627041d90c752',
                 'pastor_id' => 1,
