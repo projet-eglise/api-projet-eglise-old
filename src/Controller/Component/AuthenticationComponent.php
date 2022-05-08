@@ -52,27 +52,7 @@ class AuthenticationComponent extends Component
      */
     public function generateJwt(User $user, array $payload = []): string
     {
-        $Users = TableRegistry::getTableLocator()->get('Users');
-        $user = $Users->get($user->user_id, [
-            'fields' => ['user_id', 'uid', 'is_admin'],
-            'contain' => [
-                'Churches' => [
-                    'fields' => ['church_id', 'uid', 'name'],
-                ]
-            ]
-        ]);   
-        $churches = $user->churches;
-        
-        foreach ($churches as $church) {
-            unset($church->church_id);
-            unset($church->_joinData);
-        }
-
-        unset($user->churches);
-        unset($user->user_id);
-
-        $payload = array_merge(['user' => $user, 'churches' => $churches], $payload);
-        $payload['exp'] = time() + 3600;
+        $payload = array_merge($this->generageTokenContent($user), $payload);
         $headers_encoded = $this->base64urlEncode(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
         $payload_encoded = $this->base64urlEncode(json_encode($payload));
 
@@ -91,6 +71,10 @@ class AuthenticationComponent extends Component
     public function checkJwt(string $jwt): bool
     {
         $tokenParts = explode('.', $jwt);
+        if(count($tokenParts) !== 3) {
+            return false;
+        }
+
         $header = base64_decode($tokenParts[0]);
         $payload = base64_decode($tokenParts[1]);
         $signature_provided = $tokenParts[2];
@@ -115,5 +99,39 @@ class AuthenticationComponent extends Component
     private function base64urlEncode(string $chain): string
     {
         return rtrim(strtr(base64_encode($chain), '+/', '-_'), '=');
+    }
+
+    /**
+     * Generation of the token content.
+     *
+     * @param User $user
+     * @return array
+     */
+    public function generageTokenContent(User $user): array
+    {
+        $Users = TableRegistry::getTableLocator()->get('Users');
+        $user = $Users->get($user->user_id, [
+            'fields' => ['user_id', 'uid', 'is_admin'],
+            'contain' => [
+                'Churches' => [
+                    'fields' => ['church_id', 'uid', 'name'],
+                ]
+            ]
+        ]);   
+        $churches = $user->churches;
+        
+        foreach ($churches as $church) {
+            unset($church->church_id);
+            unset($church->_joinData);
+        }
+
+        unset($user->churches);
+        unset($user->user_id);
+
+        $payload['exp'] = time() + 3600;
+        $payload['user'] =  $user;
+        $payload['churches'] =  $churches;
+
+        return $payload;
     }
 }

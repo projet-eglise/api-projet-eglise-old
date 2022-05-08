@@ -14,7 +14,7 @@ use DateTime;
 
 class AuthenticationController extends AppController
 {
-    private UsersTable $UsersTable;
+    private UsersTable $Users;
 
     public function initialize(): void
     {
@@ -22,7 +22,7 @@ class AuthenticationController extends AppController
         $this->loadComponent('Authentication');
         $this->loadComponent('File');
 
-        $this->UsersTable = TableRegistry::getTableLocator()->get('Users');
+        $this->Users = TableRegistry::getTableLocator()->get('Users');
     }
 
     public function login()
@@ -38,7 +38,7 @@ class AuthenticationController extends AppController
             throw new BadRequestException('Email ou mot de passe vide');
         }
 
-        $user = $this->UsersTable->findByEmail($email)->toArray();
+        $user = $this->Users->findByEmail($email)->toArray();
         if (count($user) !== 1) {
             throw new NotFoundException('Identifiants invalide');
         }
@@ -82,7 +82,7 @@ class AuthenticationController extends AppController
             throw new BadRequestException('Adresse mail invalide.');
         }
 
-        if (count($this->UsersTable->findByEmail($this->request->getData('email'))->toArray()) !== 0) {
+        if (count($this->Users->findByEmail($this->request->getData('email'))->toArray()) !== 0) {
             throw new BadRequestException('Cette adresse mail est déjà affectée à un compte.');
         }
 
@@ -111,7 +111,7 @@ class AuthenticationController extends AppController
             throw new BadRequestException('Numéro de téléphone non conforme.');
         }
 
-        $user = $this->UsersTable->newEntity($this->request->getData());
+        $user = $this->Users->newEntity($this->request->getData());
         $user->uid = uniqid();
         $user->password = $this->Authentication->hashPassword($this->request->getData('password'));
 
@@ -138,10 +138,27 @@ class AuthenticationController extends AppController
             throw new BadRequestException('Une erreur est survenue.');
         }
 
-        if (!$this->UsersTable->save($user)) {
+        if (!$this->Users->save($user)) {
             throw new BadRequestException('Une erreur est survenue.');
         }
 
         return $this->apiResponse(['token' => $this->Authentication->generateJwt($user)]);
+    }
+
+    /**
+     * Sends the user account information.
+     */
+    public function whoami()
+    {
+        if (!$this->request->is('get')) {
+            throw new MethodNotAllowedException('Utilisez une requête GET');
+        }
+
+        $token = $this->Authentication->getTokenContent($this->request->getSession()->read('token'));
+        $user = $this->Users->findByUid($token['user']['uid'])->toArray()[0];
+        $data = $this->Authentication->generageTokenContent($user);
+        unset($data['exp']);
+
+        return $this->apiResponse($data);
     }
 }
