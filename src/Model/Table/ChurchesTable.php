@@ -64,9 +64,10 @@ class ChurchesTable extends Table
             'joinType' => 'INNER',
         ]);
 
-        $this->hasOne('Address', [
-            'className' => 'Addresses',
+        $this->belongsTo('Address', [
             'foreignKey' => 'address_id',
+            'joinType' => 'INNER',
+            'className' => 'Addresses',
         ]);
     }
 

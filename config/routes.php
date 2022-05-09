@@ -58,7 +58,9 @@ return static function (RouteBuilder $routes) {
             $protectedRoutes->applyMiddleware('authentication');
             
             $protectedRoutes->get('/whoami', ['controller' => 'Authentication', 'action' => 'whoami']);
-
+            
+            $protectedRoutes->get('/churches', ['controller' => 'Churches', 'action' => 'index']);
+            
             $protectedRoutes
                 ->get('/church/{uid}', ['controller' => 'Churches', 'action' => 'view'])
                 ->setPatterns(['uid' => '[a-z0-9]+']);

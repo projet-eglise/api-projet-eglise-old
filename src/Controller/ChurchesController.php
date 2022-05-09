@@ -36,6 +36,25 @@ class ChurchesController extends AppController
         $this->Users = TableRegistry::getTableLocator()->get('Users');
     }
 
+    public function index()
+    {
+        $this->apiResponse(
+                $this->Churches->find('all', [
+                    'fields' => [
+                        'uid',
+                        'name',
+                        'address__address' => 'address',
+                        'address__address2' => 'CONCAT(postal_code, \' \', city)',
+                        'address__city' => 'city',
+                        'pastor__name' => 'CONCAT(firstname, \' \', UPPER(lastname))'
+                    ],
+                    'contain' => [
+                        'Address', 'Pastor'
+                    ]
+                ])->toArray()
+            );
+    }
+
     /**
      * View method
      *
@@ -45,7 +64,14 @@ class ChurchesController extends AppController
     {
         $church = $this->Churches->findByUid($churchUid ?? $this->request->getParam('uid'), ['fields' => ['church_id']])->toArray()[0];
         $church = $this->Churches->get($church->church_id, [
-            'fields' => ['uid', 'name'],
+            'fields' => [
+                'uid',
+                'name',
+                'address_uid' => 'Address.uid',
+                'address_address' => 'Address.address',
+                'address_postal_code' => 'Address.postal_code',
+                'address_city' => 'Address.city',
+            ],
             'contain' => [
                 'Pastor' => ['fields' => [
                     'uid',
@@ -65,7 +91,7 @@ class ChurchesController extends AppController
                     'has_profile_picture',
                     'profile_image_link',
                 ]],
-                'Address' => ['fields' => ['uid', 'address', 'postal_code', 'city']]
+                'Address'
             ]
         ]);
 
