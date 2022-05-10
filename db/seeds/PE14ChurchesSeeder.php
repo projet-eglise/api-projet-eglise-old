@@ -45,19 +45,23 @@ class PE14ChurchesSeeder extends AbstractSeed
         $church_users->insert($church_users = [
             [
                 'church_user_id' => 1,
+                'uid' => uniqid(),
                 'user_id' => 1,
                 'church_id' => 1,
             ], [
                 'church_user_id' => 2,
+                'uid' => uniqid(),
                 'user_id' => 2,
                 'church_id' => 1,
             ],
             [
                 'church_user_id' => 3,
+                'uid' => uniqid(),
                 'user_id' => 1,
                 'church_id' => 2,
             ], [
                 'church_user_id' => 4,
+                'uid' => uniqid(),
                 'user_id' => 2,
                 'church_id' => 2,
             ]
