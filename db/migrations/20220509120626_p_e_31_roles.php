@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use Phinx\Migration\AbstractMigration;
@@ -18,20 +19,28 @@ final class PE31Roles extends AbstractMigration
      */
     public function change(): void
     {
+        $permissions = $this->table('permissions', ['id' => 'permission_id']);
+        $permissions
+            ->addColumn('uid', 'string')
+            ->addColumn('name', 'string')
+            ->addTimestamps()
+            ->create();
+
         $services = $this->table('services', ['id' => 'service_id']);
         $services
             ->addColumn('uid', 'string')
             ->addColumn('name', 'string')
             ->addTimestamps()
             ->create();
-        
+
         $roles = $this->table('roles', ['id' => 'role_id']);
         $roles
             ->addColumn('uid', 'string')
             ->addColumn('name', 'string')
-            ->addColumn('permission', 'string')
+            ->addColumn('permission_id', 'integer', ["null" => false])
             ->addColumn('service_id', 'integer', ["null" => true, "default" => null])
             ->addTimestamps()
+            ->addForeignKey('permission_id', 'permissions', 'permission_id', ['delete' => 'NO_ACTION', 'update' => 'NO_ACTION'])
             ->addForeignKey('service_id', 'services', 'service_id', ['delete' => 'NO_ACTION', 'update' => 'NO_ACTION'])
             ->create();
 
@@ -46,9 +55,10 @@ final class PE31Roles extends AbstractMigration
 
         $church_user_roles = $this->table('church_user_roles', ['id' => 'church_user_role_id']);
         $church_user_roles
+            ->addColumn('uid', 'string')
             ->addColumn('church_user_id', 'integer')
             ->addColumn('role_id', 'integer')
-            ->addColumn('role_option_id', 'integer')
+            ->addColumn('role_option_id', 'integer', ["null" => true, "default" => null])
             ->addTimestamps()
             ->addForeignKey('church_user_id', 'church_users', 'church_user_id', ['delete' => 'NO_ACTION', 'update' => 'NO_ACTION'])
             ->addForeignKey('role_id', 'roles', 'role_id', ['delete' => 'NO_ACTION', 'update' => 'NO_ACTION'])
