@@ -39,7 +39,33 @@ class ChurchesController extends AppController
     public function index()
     {
         $this->apiResponse(
-                $this->Churches->find('all', [
+            $this->Churches->find('all', [
+                'fields' => [
+                    'uid',
+                    'name',
+                    'address__address' => 'address',
+                    'address__address2' => 'CONCAT(postal_code, \' \', city)',
+                    'address__city' => 'city',
+                    'pastor__name' => 'CONCAT(firstname, \' \', UPPER(lastname))'
+                ],
+                'contain' => [
+                    'Address', 'Pastor'
+                ]
+            ])->toArray()
+        );
+    }
+
+    public function getAllForJoin()
+    {
+        $myChurches = $this->ChurchUsers->find('list', [
+            'keyField' => 'church_id',
+            'valueField' => 'church_id',
+            'conditions' => ['user_id' => $this->getUserId()],
+        ])->toArray();
+
+        $this->apiResponse(
+            $this->Churches
+                ->find('all', [
                     'fields' => [
                         'uid',
                         'name',
@@ -51,8 +77,12 @@ class ChurchesController extends AppController
                     'contain' => [
                         'Address', 'Pastor'
                     ]
-                ])->toArray()
-            );
+                ])
+                ->where([
+                    "church_id NOT IN (".implode(", ", $myChurches).")"
+                ])
+                ->toArray()
+        );
     }
 
     /**
