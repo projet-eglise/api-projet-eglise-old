@@ -56,12 +56,16 @@ return static function (RouteBuilder $routes) {
         $builder
             ->get('/password_request/request/{mail}', ['controller' => 'PasswordRequests', 'action' => 'request'])
             ->setPatterns(['mail' => '(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))']);
+        $builder
+            ->get('/password_request/check/{token}', ['controller' => 'PasswordRequests', 'action' => 'checkToken'])
+            ->setPatterns(['token' => '[a-z0-9]+']);
+        $builder->post('/password_request/change_password', ['controller' => 'PasswordRequests', 'action' => 'changePassword']);
 
         $builder->scope('', function (RouteBuilder $protectedRoutes) {
             $protectedRoutes->applyMiddleware('authentication');
-            
+
             $protectedRoutes->get('/whoami', ['controller' => 'Authentication', 'action' => 'whoami']);
-            
+
             $protectedRoutes->get('/churches', ['controller' => 'Churches', 'action' => 'index']);
             $protectedRoutes->get('/churches/forJoin', ['controller' => 'Churches', 'action' => 'getAllForJoin']);
             $protectedRoutes

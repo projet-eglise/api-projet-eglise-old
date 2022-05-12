@@ -90,7 +90,7 @@ class AuthenticationController extends AppController
             throw new BadRequestException('Mot de passe non renseignée.');
         }
 
-        if (!preg_match('^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$^', $this->request->getData('password'))) {
+        if (!preg_match('^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&^])[A-Za-z\d@$!%*#?&^]{8,}$^', $this->request->getData('password'))) {
             throw new BadRequestException('Mot de passe non conforme.');
         }
 
