@@ -52,6 +52,8 @@ class PasswordRequestsTable extends Table
             'foreignKey' => 'user_id',
             'joinType' => 'INNER',
         ]);
+
+        $this->clearRequests();
     }
 
     /**
@@ -106,5 +108,16 @@ class PasswordRequestsTable extends Table
         $rules->add($rules->existsIn('user_id', 'Users'), ['errorField' => 'user_id']);
 
         return $rules;
+    }
+
+    public function clearRequests()
+    {
+        $expiredRequests = $this->find('all', [
+            'conditions' => ['expiration < ' => time()]
+        ]);
+
+        foreach ($expiredRequests as $request) {
+            $this->delete($request);
+        }
     }
 }

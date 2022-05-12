@@ -53,6 +53,9 @@ return static function (RouteBuilder $routes) {
          */
         $builder->post('/login', ['controller' => 'Authentication', 'action' => 'login']);
         $builder->post('/signin', ['controller' => 'Authentication', 'action' => 'signin']);
+        $builder
+            ->get('/password_request/request/{mail}', ['controller' => 'PasswordRequests', 'action' => 'request'])
+            ->setPatterns(['mail' => '(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))']);
 
         $builder->scope('', function (RouteBuilder $protectedRoutes) {
             $protectedRoutes->applyMiddleware('authentication');
