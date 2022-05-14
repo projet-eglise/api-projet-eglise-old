@@ -102,18 +102,18 @@ class PE31RolesSeeder extends AbstractSeed
         $role_options = $this->table('role_options');
         $role_options
             ->insert([
-                ['role_option_id' => 1, 'uid' => uniqid(), 'name' => 'Piano', 'role_id' => 6],
-                ['role_option_id' => 2, 'uid' => uniqid(), 'name' => 'Batterie', 'role_id' => 6],
-                ['role_option_id' => 3, 'uid' => uniqid(), 'name' => 'Violon', 'role_id' => 6],
-                ['role_option_id' => 4, 'uid' => uniqid(), 'name' => 'Guitare', 'role_id' => 6],
-                ['role_option_id' => 5, 'uid' => uniqid(), 'name' => 'Basse', 'role_id' => 6],
-                ['role_option_id' => 6, 'uid' => uniqid(), 'name' => 'Soprano', 'role_id' => 7],
-                ['role_option_id' => 7, 'uid' => uniqid(), 'name' => 'Mezzo', 'role_id' => 7],
-                ['role_option_id' => 8, 'uid' => uniqid(), 'name' => 'Alto', 'role_id' => 7],
-                ['role_option_id' => 9, 'uid' => uniqid(), 'name' => 'Contralto', 'role_id' => 7],
-                ['role_option_id' => 10, 'uid' => uniqid(), 'name' => 'Ténor', 'role_id' => 7],
-                ['role_option_id' => 11, 'uid' => uniqid(), 'name' => 'Baryton', 'role_id' => 7],
-                ['role_option_id' => 12, 'uid' => uniqid(), 'name' => 'Basse', 'role_id' => 7],
+                ['role_option_id' => 1, 'uid' => uniqid(), 'name' => 'Piano', 'role_id' => 5],
+                ['role_option_id' => 2, 'uid' => uniqid(), 'name' => 'Batterie', 'role_id' => 5],
+                ['role_option_id' => 3, 'uid' => uniqid(), 'name' => 'Violon', 'role_id' => 5],
+                ['role_option_id' => 4, 'uid' => uniqid(), 'name' => 'Guitare', 'role_id' => 5],
+                ['role_option_id' => 5, 'uid' => uniqid(), 'name' => 'Basse', 'role_id' => 5],
+                ['role_option_id' => 6, 'uid' => uniqid(), 'name' => 'Soprano', 'role_id' => 6],
+                ['role_option_id' => 7, 'uid' => uniqid(), 'name' => 'Mezzo', 'role_id' => 6],
+                ['role_option_id' => 8, 'uid' => uniqid(), 'name' => 'Alto', 'role_id' => 6],
+                ['role_option_id' => 9, 'uid' => uniqid(), 'name' => 'Contralto', 'role_id' => 6],
+                ['role_option_id' => 10, 'uid' => uniqid(), 'name' => 'Ténor', 'role_id' => 6],
+                ['role_option_id' => 11, 'uid' => uniqid(), 'name' => 'Baryton', 'role_id' => 6],
+                ['role_option_id' => 12, 'uid' => uniqid(), 'name' => 'Basse', 'role_id' => 6],
             ])
             ->saveData();
 

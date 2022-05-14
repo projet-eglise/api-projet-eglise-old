@@ -52,6 +52,10 @@ class RolesTable extends Table
             'foreignKey' => 'permission_id',
             'joinType' => 'INNER',
         ]);
+
+        $this->hasMany('RoleOptions', [
+            'foreignKey' => 'role_id'
+        ]);
     }
 
     /**

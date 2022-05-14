@@ -40,6 +40,8 @@ class ServicesTable extends Table
         $this->setTable('services');
         $this->setDisplayField('name');
         $this->setPrimaryKey('service_id');
+
+        $this->hasMany('Roles');
     }
 
     /**

@@ -62,9 +62,11 @@ return static function (RouteBuilder $routes) {
             $protectedRoutes->get('/churches', ['controller' => 'Churches', 'action' => 'index']);
             $protectedRoutes->get('/churches/forJoin', ['controller' => 'Churches', 'action' => 'getAllForJoin']);
             $protectedRoutes
-                ->get('/church/{uid}', ['controller' => 'Churches', 'action' => 'view'])
-                ->setPatterns(['uid' => '[a-z0-9]+']);
+            ->get('/church/{uid}', ['controller' => 'Churches', 'action' => 'view'])
+            ->setPatterns(['uid' => '[a-z0-9]+']);
             $protectedRoutes->post('/church/add', ['controller' => 'Churches', 'action' => 'add']);
+
+            $protectedRoutes->get('/roles', ['controller' => 'Roles', 'action' => 'index']);
         });
 
 
