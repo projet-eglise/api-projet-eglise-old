@@ -5,6 +5,7 @@ namespace App\Controller\Component;
 use App\Model\Entity\User;
 use Cake\Controller\Component;
 use Cake\Core\Configure;
+use Cake\Http\Exception\BadRequestException;
 use Cake\ORM\TableRegistry;
 
 class AuthenticationComponent extends Component
@@ -40,6 +41,9 @@ class AuthenticationComponent extends Component
      */
     public function hashPassword(string $password): string
     {
+        if (!preg_match('^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$^', $password))
+            throw new BadRequestException('Mot de passe non conforme.');
+
         return password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
     }
 
@@ -71,7 +75,7 @@ class AuthenticationComponent extends Component
     public function checkJwt(string $jwt): bool
     {
         $tokenParts = explode('.', $jwt);
-        if(count($tokenParts) !== 3) {
+        if (count($tokenParts) !== 3) {
             return false;
         }
 
@@ -117,9 +121,9 @@ class AuthenticationComponent extends Component
                     'fields' => ['church_id', 'uid', 'name'],
                 ]
             ]
-        ]);   
+        ]);
         $churches = $user->churches;
-        
+
         foreach ($churches as $church) {
             unset($church->church_id);
             unset($church->_joinData);

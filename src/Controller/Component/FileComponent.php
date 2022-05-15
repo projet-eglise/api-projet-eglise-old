@@ -6,7 +6,9 @@ namespace App\Controller\Component;
 
 use Cake\Controller\Component;
 use Cake\Core\Configure;
+use Cake\Http\Exception\BadRequestException;
 use Filestack\FilestackClient;
+use Laminas\Diactoros\UploadedFile;
 
 /**
  * File component
@@ -24,6 +26,27 @@ class FileComponent extends Component
     public function initialize(array $config): void
     {
         $this->filestackClient = new FilestackClient(Configure::read('FilestackApiKey'));
+    }
+
+    /**
+     * Checks if an image is good or not.
+     *
+     * @param UploadedFile $image
+     * @return void
+     */
+    public function checkImageFile(UploadedFile $image)
+    {
+        if ($image->getSize() > 10000000) {
+            throw new BadRequestException("Votre image est trop grosse ...");
+        }
+        if ($image->getSize() == 0) {
+            throw new BadRequestException("L'image n'a pas de taille");
+        }
+
+        $imageSize = @getimagesize($image->getStream()->getMetadata()["uri"]);
+        if (!in_array($image->getClientMediaType(),  ['image/jpg', 'image/png', 'image/jpeg']) || $imageSize === false) {
+            throw new BadRequestException("Nous avons un problème avec votre image");
+        }
     }
 
     /**

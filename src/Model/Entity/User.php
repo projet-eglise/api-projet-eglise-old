@@ -12,6 +12,7 @@ use App\Model\Table\RolesTable;
 use Cake\Http\Exception\BadRequestException;
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
+use Laminas\Diactoros\UploadedFile;
 
 /**
  * User Entity
@@ -124,6 +125,19 @@ class User extends Entity
     }
 
     /**
+     * Adds a profile picture to the user.
+     *
+     * @param UploadedFile $image
+     * @return void
+     */
+    public function addProfilePicture(UploadedFile $image)
+    {
+        $this->File->checkImageFile($image);
+        $this->profile_image_link = $this->File->upload($image->getStream()->getMetadata()["uri"]);
+        $this->has_profile_picture = true;
+    }
+
+    /**
      * Returns the ChurchUserId of the user based on a Church.
      *
      * @param Church $church
@@ -173,6 +187,7 @@ class User extends Entity
 
     /**
      * Adds roles that the user does not have yet.
+     * Be careful, this operation saves the data at the end of the function.
      *
      * @param array $roles
      * @param Church $church
@@ -209,6 +224,7 @@ class User extends Entity
                 $hydrated['roles'] = false;
             }
         }
+
         $this->ChurchUserRoles->getConnection()->commit();
     }
 }
