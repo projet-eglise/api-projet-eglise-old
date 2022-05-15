@@ -110,6 +110,8 @@ class AuthenticationComponent extends Component
      *
      * @param User $user
      * @return array
+     * 
+     * @todo Gestion avec les règles métiers
      */
     public function generageTokenContent(User $user): array
     {

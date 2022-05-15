@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Model\Entity;
 
+use App\Controller\Component\FileComponent;
 use App\Model\Table\ChurchesTable;
 use App\Model\Table\ChurchUserRolesTable;
 use App\Model\Table\ChurchUsersTable;
 use App\Model\Table\RoleOptionsTable;
 use App\Model\Table\RolesTable;
+use Cake\Controller\ComponentRegistry;
 use Cake\Http\Exception\BadRequestException;
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
@@ -41,15 +43,19 @@ class User extends Entity
     private ChurchesTable $Churches;
     private RolesTable $Roles;
     private RoleOptionsTable $RoleOptions;
+    private FileComponent $File;
 
     public function __construct(array $properties = [], array $options = [])
     {
         parent::__construct($properties, $options);
+        
         $this->ChurchUsers = TableRegistry::getTableLocator()->get('ChurchUsers');
         $this->ChurchUserRoles = TableRegistry::getTableLocator()->get('ChurchUserRoles');
         $this->Churches = TableRegistry::getTableLocator()->get('Churches');
         $this->Roles = TableRegistry::getTableLocator()->get('Roles');
         $this->RoleOptions = TableRegistry::getTableLocator()->get('RoleOptions');
+        
+        $this->File = new FileComponent(new ComponentRegistry());
     }
 
     /**

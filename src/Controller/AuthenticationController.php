@@ -60,18 +60,21 @@ class AuthenticationController extends AppController
         $user->uid = uniqid();
         $user->password = $this->Authentication->hashPassword($this->request->getData('password'));
 
-        $image = $this->request->getData('profile_image');
-        if ($image !== null)
-            $user->addProfilePicture($image);
-
-
         if (!$this->Users->save($user)) {
             $errors = $user->getErrors();
             if (empty($errors))
-                throw new BadRequestException('Une erreur est survenue lors de l\'enregistrement.');
+                throw new BadRequestException('Une erreur est survenue lors de l\'enregistrement');
 
             $field = reset($errors);
             throw new BadRequestException(reset($field));
+        }
+
+        $image = $this->request->getData('profile_image');
+        if ($image !== null)
+            $user->addProfilePicture($image);
+        
+        if (!$this->Users->save($user)) {
+            throw new BadRequestException('Une erreur est survenue lors de la mise en ligne de l\'image');
         }
 
         return $this->apiResponse(['token' => $this->Authentication->generateJwt($user)]);
