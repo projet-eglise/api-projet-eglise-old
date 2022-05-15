@@ -200,7 +200,7 @@ class ChurchesController extends AppController
             'has_profile_picture' => false,
         ]);
 
-        if (count($pastor->getErrors()) > 0)
+        if ($pastor->hasErrors())
             throw new HttpException("Une erreur est survenu lors de la création du pasteur.\n" . json_encode($pastor->getErrors()), 422);
 
         $church = $this->Churches->newEntity([
@@ -210,7 +210,7 @@ class ChurchesController extends AppController
             'main_administrator_id' => $this->getUserId(),
         ]);
 
-        if (count($church->getErrors()) > 0)
+        if ($church->hasErrors())
             throw new HttpException("Une erreur est survenu lors de la création de l'Eglise.\n" . json_encode($church->getErrors()), 422);
 
         $address = $this->Addresses->newEntity([
@@ -220,7 +220,7 @@ class ChurchesController extends AppController
             'city' => $this->request->getData('church_city'),
         ]);
 
-        if (count($church->getErrors()) > 0)
+        if ($church->hasErrors())
             throw new HttpException("Une erreur est survenu lors de la création de l'adresse de l'Eglise.\n" . json_encode($church->getErrors()), 422);
 
         if (!$pastorIsAdmin)
@@ -248,10 +248,10 @@ class ChurchesController extends AppController
             'user_id' => $church->main_administrator_id,
         ]);
 
-        if (count($churchPastor->getErrors()) > 0)
+        if ($churchPastor->hasErrors())
             throw new HttpException("Une erreur est survenu lors de la création du pasteur.\n" . json_encode($pastor->getErrors()), 422);
 
-        if (count($churchMainAdministrator->getErrors()) > 0)
+        if ($churchMainAdministrator->hasErrors())
             throw new HttpException("Une erreur est survenu lors de la création du pasteur.\n" . json_encode($pastor->getErrors()), 422);
 
         if (!$pastorIsAdmin)

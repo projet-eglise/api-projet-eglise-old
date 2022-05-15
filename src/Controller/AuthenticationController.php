@@ -134,7 +134,7 @@ class AuthenticationController extends AppController
             $user->has_profile_picture = true;
         }
 
-        if (!empty($user->getErrors())) {
+        if ($user->hasErrors()) {
             throw new BadRequestException('Une erreur est survenue.');
         }
 
