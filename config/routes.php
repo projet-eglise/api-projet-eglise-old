@@ -53,7 +53,7 @@ return static function (RouteBuilder $routes) {
          */
         $builder->post('/login', ['controller' => 'Authentication', 'action' => 'login']);
         $builder->post('/signin', ['controller' => 'Authentication', 'action' => 'signin']);
-
+        
         $builder->scope('', function (RouteBuilder $protectedRoutes) {
             $protectedRoutes->applyMiddleware('authentication');
             
@@ -65,8 +65,10 @@ return static function (RouteBuilder $routes) {
             ->get('/church/{uid}', ['controller' => 'Churches', 'action' => 'view'])
             ->setPatterns(['uid' => '[a-z0-9]+']);
             $protectedRoutes->post('/church/add', ['controller' => 'Churches', 'action' => 'add']);
-
+            
             $protectedRoutes->get('/roles', ['controller' => 'Roles', 'action' => 'index']);
+            
+            $protectedRoutes->post('/user/{userUid}/addRolesInChurch/{churchUid}', ['controller' => 'Users', 'action' => 'addRolesInChurch']);
         });
 
 
