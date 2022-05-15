@@ -20,7 +20,6 @@ class RolesController extends AppController
     public function initialize(): void
     {
         parent::initialize();
-
         $this->Services = TableRegistry::getTableLocator()->get('Services');
     }
 

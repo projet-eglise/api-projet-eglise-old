@@ -9,6 +9,7 @@ use Cake\ORM\Entity;
  * ChurchUserRole Entity
  *
  * @property int $church_user_role_id
+ * @property string $uid
  * @property int $church_user_id
  * @property int $role_id
  * @property int $role_option_id
@@ -27,6 +28,7 @@ class ChurchUserRole extends Entity
      * @var array
      */
     protected $_accessible = [
+        'uid' => true,
         'church_user_id' => true,
         'role_id' => true,
         'role_option_id' => true,

@@ -78,9 +78,9 @@ class ChurchesController extends AppController
                         'Address', 'Pastor'
                     ]
                 ])
-                ->where([
+                ->where(count($myChurches) > 0 ? [
                     "church_id NOT IN (".implode(", ", $myChurches).")"
-                ])
+                ] : [])
                 ->toArray()
         );
     }
@@ -92,7 +92,7 @@ class ChurchesController extends AppController
      */
     public function view(string $churchUid = null)
     {
-        $church = $this->Churches->findByUid($churchUid ?? $this->request->getParam('uid'), ['fields' => ['church_id']])->toArray()[0];
+        $church = $this->Churches->findByUid($churchUid ?? $this->request->getParam('uid'), ['fields' => ['church_id']])->first();
         $church = $this->Churches->get($church->church_id, [
             'fields' => [
                 'uid',
@@ -237,11 +237,13 @@ class ChurchesController extends AppController
             throw new InternalErrorException("Une erreur est survenu lors de l'ajout de l'Eglise.\n");
 
         $churchPastor = $this->ChurchUsers->newEntity([
+            'uid' => uniqid(),
             'church_id' => $church->church_id,
             'user_id' => $church->pastor_id,
         ]);
 
         $churchMainAdministrator = $this->ChurchUsers->newEntity([
+            'uid' => uniqid(),
             'church_id' => $church->church_id,
             'user_id' => $church->main_administrator_id,
         ]);

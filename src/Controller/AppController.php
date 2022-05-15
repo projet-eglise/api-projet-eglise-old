@@ -137,6 +137,6 @@ class AppController extends Controller
      */
     protected function getUserId(): int
     {
-        return $this->Users->findByUid($this->Authentication->getTokenContent($this->request->getSession()->read('token'))['user']['uid'])->toArray()[0]->user_id;
+        return $this->Users->findByUid($this->Authentication->getTokenContent($this->request->getSession()->read('token'))['user']['uid'])->first()->user_id;
     }
 }

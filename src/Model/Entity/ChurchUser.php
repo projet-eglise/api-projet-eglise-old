@@ -9,6 +9,7 @@ use Cake\ORM\Entity;
  * ChurchUser Entity
  *
  * @property int $church_user_id
+ * @property string $uid
  * @property int $user_id
  * @property int $church_id
  * @property \Cake\I18n\FrozenTime $created_at
@@ -26,6 +27,7 @@ class ChurchUser extends Entity
      * @var array
      */
     protected $_accessible = [
+        'uid' => true,
         'user_id' => true,
         'church_id' => true,
         'created_at' => true,

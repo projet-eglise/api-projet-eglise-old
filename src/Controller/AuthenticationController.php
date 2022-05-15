@@ -155,7 +155,7 @@ class AuthenticationController extends AppController
         }
 
         $token = $this->Authentication->getTokenContent($this->request->getSession()->read('token'));
-        $user = $this->Users->findByUid($token['user']['uid'])->toArray()[0];
+        $user = $this->Users->findByUid($token['user']['uid'])->first();
         $data = $this->Authentication->generageTokenContent($user);
         unset($data['exp']);
 
