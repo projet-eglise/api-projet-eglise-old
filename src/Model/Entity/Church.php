@@ -1,9 +1,15 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model\Entity;
 
+use App\Model\Table\ChurchesTable;
+use App\Model\Table\ChurchUserRolesTable;
+use Cake\Http\Exception\BadRequestException;
+use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Entity;
+use Cake\ORM\TableRegistry;
 
 /**
  * Church Entity
@@ -13,6 +19,7 @@ use Cake\ORM\Entity;
  * @property string $uid
  * @property int $pastor_id
  * @property int $main_administrator_id
+ * @property int $address_id
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime|null $updated_at
  */
@@ -32,7 +39,125 @@ class Church extends Entity
         'uid' => true,
         'pastor_id' => true,
         'main_administrator_id' => true,
+        'address_id' => true,
         'created_at' => true,
         'updated_at' => true,
     ];
+
+    private ?User $mainAdministrator;
+    private ?User $pastor;
+
+    private $hydrated = [
+        'mainAdministrator' => false,
+        'pastor' => false,
+    ];
+
+    private ChurchUserRolesTable $ChurchUserRoles;
+    private ChurchesTable $Churches;
+
+    public function __construct(array $properties = [], array $options = [])
+    {
+        parent::__construct($properties, $options);
+
+        $this->ChurchUserRoles = TableRegistry::getTableLocator()->get('ChurchUserRoles');
+        $this->Churches = TableRegistry::getTableLocator()->get('Churches');
+    }
+
+    /**
+     * Fills in the variable mainAdministrator.
+     */
+    private function hydrateMainAdministrator()
+    {
+        if (!$this->hydrated['mainAdministrator']) {
+            if ($this->main_administrator_id !== null)
+                $this->mainAdministrator = $this->Users->get($this->main_administrator_id);
+            else
+                $this->mainAdministrator = null;
+
+            $this->hydrated['mainAdministrator'] = true;
+        }
+    }
+
+    /**
+     * Fills in the variable pastor.
+     */
+    private function hydratePastor()
+    {
+        if (!$this->hydrated['pastor']) {
+            if ($this->pastor_id !== null)
+                $this->pastor = $this->Users->get($this->pastor_id);
+            else
+                $this->pastor = null;
+
+            $this->hydrated['pastor'] = true;
+        }
+    }
+
+    /**
+     * Add a senior administrator to the church if it does not have one.
+     *
+     * @param User $user
+     * @return void
+     */
+    public function addMainAdministrator(User $user)
+    {
+        $this->hydrateMainAdministrator();
+
+        if ($this->mainAdministrator !== null) {
+            throw new InternalErrorException('Un administrateur principal est déjà affecté à cet Eglise');
+        }
+
+        if (!$user->isInChurch($this)) {
+            throw new InternalErrorException("L'administrateur présumé n'appartient pas à cette Eglise");
+        }
+
+        $administrator = $this->ChurchUserRoles->newEntity([
+            'uid' => uniqid(),
+            'role_id' => 1,
+            'church_user_id' => $user->getChurchUserId($this),
+            'role_option_id' => null,
+        ]);
+
+        if (!$this->ChurchUserRoles->save($administrator, ['associated' => false]))
+            throw new InternalErrorException("Une erreur est survenue l'ajout de l'administrateur principal");
+
+        $this->main_administrator_id = $user->user_id;
+
+        if (!$this->Churches->save($this, ['associated' => false]))
+            throw new InternalErrorException("Une erreur est survenue la sauvegarde de l'administrateur principal");
+    }
+
+    /**
+     * Add a pastor to the church if it does not have one.
+     *
+     * @param User $user
+     * @return void
+     */
+    public function addPastor(User $user)
+    {
+        $this->hydratePastor();
+
+        if ($this->pastor !== null) {
+            throw new InternalErrorException('Un pasteur est déjà affecté à cet Eglise');
+        }
+
+        if (!$user->isInChurch($this)) {
+            throw new InternalErrorException("Le pasteur présumé n'appartient pas à cette Eglise");
+        }
+
+        $pastor = $this->ChurchUserRoles->newEntity([
+            'uid' => uniqid(),
+            'role_id' => 1,
+            'church_user_id' => $user->getChurchUserId($this),
+            'role_option_id' => null,
+        ]);
+
+        if (!$this->ChurchUserRoles->save($pastor, ['associated' => false]))
+            throw new InternalErrorException("Une erreur est survenue l'ajout du pasteur");
+
+        $this->pastor_id = $user->user_id;
+
+        if (!$this->Churches->save($this, ['associated' => false]))
+            throw new InternalErrorException("Une erreur est survenue la sauvegarde du pasteur");
+    }
 }

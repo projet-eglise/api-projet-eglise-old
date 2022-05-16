@@ -26,6 +26,7 @@ class RolesController extends AppController
     /**
      * Index method
      *
+     * @todo refacto
      * @return \Cake\Http\Response|null|void Renders view
      */
     public function index()

@@ -23,8 +23,8 @@ final class PE11NotionOfChurch extends AbstractMigration
         $churches
             ->addColumn('uid', 'string')
             ->addColumn('name', 'string')
-            ->addColumn('pastor_id', 'integer')
-            ->addColumn('main_administrator_id', 'integer')
+            ->addColumn('pastor_id', 'integer', ['null' => true])
+            ->addColumn('main_administrator_id', 'integer', ['null' => true])
             ->addTimestamps()
             ->addForeignKey('pastor_id', 'users', 'user_id', ['delete' => 'NO_ACTION', 'update' => 'NO_ACTION'])
             ->addForeignKey('main_administrator_id', 'users', 'user_id', ['delete' => 'NO_ACTION', 'update' => 'NO_ACTION'])

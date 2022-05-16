@@ -65,19 +65,20 @@ class AddressesTable extends Table
             ->scalar('address')
             ->maxLength('address', 255)
             ->requirePresence('address', 'create')
-            ->notEmptyString('address');
+            ->notEmptyString('address', "Adresse vide");
 
         $validator
             ->scalar('postal_code')
+            ->regex('postal_code', '^[0-9][0-9A-B][0-9]{3}^', "Code postal incorrect")
             ->maxLength('postal_code', 255)
             ->requirePresence('postal_code', 'create')
-            ->notEmptyString('postal_code');
+            ->notEmptyString('postal_code', "Code postal vide");
 
         $validator
             ->scalar('city')
             ->maxLength('city', 255)
             ->requirePresence('city', 'create')
-            ->notEmptyString('city');
+            ->notEmptyString('city', "Vile non renseignée");
 
         return $validator;
     }

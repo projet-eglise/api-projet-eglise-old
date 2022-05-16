@@ -93,7 +93,7 @@ class ChurchesTable extends Table
             ->scalar('name')
             ->maxLength('name', 255)
             ->requirePresence('name', 'create')
-            ->notEmptyString('name');
+            ->notEmptyString('name', "Nom de l'Eglise incorrect");
 
         $validator
             ->dateTime('created_at')

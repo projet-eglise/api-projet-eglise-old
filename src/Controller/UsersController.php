@@ -29,7 +29,7 @@ class UsersController extends AppController
     }
 
     /**
-     * Join church
+     * Adds roles for a user of a church.
      *
      * @return \Cake\Http\Response|null|void Renders view
      */

@@ -12,6 +12,7 @@ use App\Model\Table\RoleOptionsTable;
 use App\Model\Table\RolesTable;
 use Cake\Controller\ComponentRegistry;
 use Cake\Http\Exception\BadRequestException;
+use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
 use Laminas\Diactoros\UploadedFile;
@@ -48,13 +49,13 @@ class User extends Entity
     public function __construct(array $properties = [], array $options = [])
     {
         parent::__construct($properties, $options);
-        
+
         $this->ChurchUsers = TableRegistry::getTableLocator()->get('ChurchUsers');
         $this->ChurchUserRoles = TableRegistry::getTableLocator()->get('ChurchUserRoles');
         $this->Churches = TableRegistry::getTableLocator()->get('Churches');
         $this->Roles = TableRegistry::getTableLocator()->get('Roles');
         $this->RoleOptions = TableRegistry::getTableLocator()->get('RoleOptions');
-        
+
         $this->File = new FileComponent(new ComponentRegistry());
     }
 
@@ -102,6 +103,7 @@ class User extends Entity
     private function hydrateChurches()
     {
         if (!$this->hydrated['churches']) {
+            $this->churches = [];
             $churchesIds = $this->ChurchUsers->find('list', [
                 'keyField' => 'church_id',
                 'valueField' => 'church_id',
@@ -162,10 +164,41 @@ class User extends Entity
      * @param Church $church
      * @return boolean
      */
-    public function isInChurch(Church $church)
+    public function isInChurch(Church $churchToCheck)
     {
         $this->hydrateChurches();
-        return in_array($church, $this->churches);
+
+        foreach ($this->churches as $church)
+            if ($church->church_id === $churchToCheck->church_id)
+                return true;
+
+        return false;
+    }
+
+    /**
+     * Allows a user to join a church.
+     *
+     * @param Church $church
+     * @return void
+     */
+    public function joinChurch(Church $church): ?ChurchUser
+    {
+        if ($this->isInChurch($church)) {
+            throw new InternalErrorException('Vous ne pouvez pas rejoindre deux fois une même Eglise ...');
+        }
+
+        $churchUser = $this->ChurchUsers->newEntity([
+            'uid' => uniqid(),
+            'church_id' => $church->church_id,
+            'user_id' => $this->user_id,
+        ]);
+
+        if (!$this->ChurchUsers->save($churchUser, ['associated' => false]))
+            throw new InternalErrorException("Une erreur est survenue en rejoignant l'Eglise");
+
+        $this->hydrated['churches'] = false;
+
+        return $churchUser;
     }
 
     /**
@@ -202,7 +235,7 @@ class User extends Entity
     public function addRoles(array $roles, Church $church): void
     {
         if (!$this->isInChurch($church)) {
-            throw new BadRequestException('Vous n\'appartenez pas à cette Eglise. Vous devez la rejoindre avant de choisir des rôles.');
+            throw new InternalErrorException('Vous n\'appartenez pas à cette Eglise. Vous devez la rejoindre avant de choisir des rôles.');
         }
 
         $this->ChurchUserRoles->getConnection()->begin();
@@ -215,7 +248,7 @@ class User extends Entity
                 $option = $this->RoleOptions->findByUid($value['option'])->first();
 
                 if (!$role->isAnOption($option)) {
-                    throw new BadRequestException("L'option " . $option->name . " ne peut être ajouté au rôle " . $role->name);
+                    throw new InternalErrorException("L'option " . $option->name . " ne peut être ajouté au rôle " . $role->name);
                 }
 
                 $churchUserRole->role_option_id = $option->role_option_id;

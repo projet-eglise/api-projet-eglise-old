@@ -84,9 +84,14 @@ class Role extends Entity
      * @param RoleOption $roleOption
      * @return boolean
      */
-    public function isAnOption(RoleOption $roleOption)
+    public function isAnOption(RoleOption $roleOptionToCheck)
     {
         $this->hydrateAvailableOptions();
-        return in_array($roleOption, $this->availableOptions);
+
+        foreach ($this->availableOptions as $roleOption)
+        if ($roleOption->role_option_id === $roleOptionToCheck->role_option_id)
+            return true;
+
+        return false;
     }
 }
