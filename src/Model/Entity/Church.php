@@ -45,11 +45,11 @@ class Church extends Entity
     ];
 
     private ?User $mainAdministrator;
-    private ?User $pastor;
+    private ?User $mainPastor;
 
     private $hydrated = [
         'mainAdministrator' => false,
-        'pastor' => false,
+        'mainPastor' => false,
     ];
 
     private ChurchUserRolesTable $ChurchUserRoles;
@@ -83,13 +83,13 @@ class Church extends Entity
      */
     private function hydratePastor()
     {
-        if (!$this->hydrated['pastor']) {
+        if (!$this->hydrated['mainPastor']) {
             if ($this->pastor_id !== null)
-                $this->pastor = $this->Users->get($this->pastor_id);
+                $this->mainPastor = $this->Users->get($this->pastor_id);
             else
-                $this->pastor = null;
+                $this->mainPastor = null;
 
-            $this->hydrated['pastor'] = true;
+            $this->hydrated['mainPastor'] = true;
         }
     }
 
@@ -137,7 +137,7 @@ class Church extends Entity
     {
         $this->hydratePastor();
 
-        if ($this->pastor !== null) {
+        if ($this->mainPastor !== null) {
             throw new InternalErrorException('Un pasteur est déjà affecté à cet Eglise');
         }
 
@@ -145,19 +145,53 @@ class Church extends Entity
             throw new InternalErrorException("Le pasteur présumé n'appartient pas à cette Eglise");
         }
 
-        $pastor = $this->ChurchUserRoles->newEntity([
+        $mainPastor = $this->ChurchUserRoles->newEntity([
             'uid' => uniqid(),
             'role_id' => 1,
             'church_user_id' => $user->getChurchUserId($this),
             'role_option_id' => null,
         ]);
 
-        if (!$this->ChurchUserRoles->save($pastor, ['associated' => false]))
+        if (!$this->ChurchUserRoles->save($mainPastor, ['associated' => false]))
             throw new InternalErrorException("Une erreur est survenue l'ajout du pasteur");
 
         $this->pastor_id = $user->user_id;
 
         if (!$this->Churches->save($this, ['associated' => false]))
             throw new InternalErrorException("Une erreur est survenue la sauvegarde du pasteur");
+    }
+
+    /**
+     * Unset the variables needed for an api return.
+     *
+     * @return Church
+     */
+    public function toApi(): Church
+    {
+        unset($this->church_id);
+        unset($this->address_id);
+        unset($this->pastor_id);
+        unset($this->main_administrator_id);
+        unset($this->created_at);
+        unset($this->updated_at);
+
+        if(isset($this->main_administrator)) {
+            $this->main_administrator->toApi();
+        }
+
+        if(isset($this->pastor)) {
+            $this->pastor->toApi();
+        }
+
+        if(isset($this->addres)) {
+            $this->addres->toApi();
+        }
+
+        $this->address = $this->addres;
+        unset($this->addres);
+        unset($mainAdministrator);
+        unset($mainPastor);
+
+        return $this;
     }
 }

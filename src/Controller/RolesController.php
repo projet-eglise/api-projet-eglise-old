@@ -26,7 +26,6 @@ class RolesController extends AppController
     /**
      * Index method
      *
-     * @todo refacto
      * @return \Cake\Http\Response|null|void Renders view
      */
     public function index()
@@ -43,16 +42,8 @@ class RolesController extends AppController
             ]
         ])->toArray();
 
-        foreach ($services as $service) {
-            unset($service->service_id);
-            foreach ($service->roles as $role) {
-                unset($role->service_id);
-                unset($role->role_id);
-                foreach ($role->role_options as $role_option) {
-                    unset($role_option->role_id);
-                }
-            }
-        }
+        foreach ($services as $service)
+            $service->toApi();
 
         $this->apiResponse($services);
     }

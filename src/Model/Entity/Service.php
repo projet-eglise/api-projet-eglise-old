@@ -31,4 +31,20 @@ class Service extends Entity
         'created_at' => true,
         'updated_at' => true,
     ];
+
+    /**
+     * Unset the variables needed for an api return.
+     *
+     * @return Service
+     */
+    public function toApi(): Service
+    {
+        unset($this->service_id);
+
+        if(isset($this->roles) && !empty($this->roles))
+            foreach ($this->roles as $role)
+                $role->toApi();
+
+        return $this;
+    }
 }

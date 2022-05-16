@@ -89,9 +89,26 @@ class Role extends Entity
         $this->hydrateAvailableOptions();
 
         foreach ($this->availableOptions as $roleOption)
-        if ($roleOption->role_option_id === $roleOptionToCheck->role_option_id)
-            return true;
+            if ($roleOption->role_option_id === $roleOptionToCheck->role_option_id)
+                return true;
 
         return false;
+    }
+
+    /**
+     * Unset the variables needed for an api return.
+     *
+     * @return Role
+     */
+    public function toApi(): Role
+    {
+        unset($this->role_id);
+        unset($this->service_id);
+
+        if (isset($this->role_options) && !empty($this->role_options))
+            foreach ($this->role_options as $role_option)
+                $role_option->toApi();
+
+        return $this;
     }
 }

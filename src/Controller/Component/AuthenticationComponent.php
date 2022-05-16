@@ -110,29 +110,12 @@ class AuthenticationComponent extends Component
      *
      * @param User $user
      * @return array
-     * 
-     * @todo Gestion avec les règles métiers
      */
     public function generageTokenContent(User $user): array
     {
-        $Users = TableRegistry::getTableLocator()->get('Users');
-        $user = $Users->get($user->user_id, [
-            'fields' => ['user_id', 'uid', 'is_admin'],
-            'contain' => [
-                'Churches' => [
-                    'fields' => ['church_id', 'uid', 'name'],
-                ]
-            ]
-        ]);
+        $user->toToken();
         $churches = $user->churches;
-
-        foreach ($churches as $church) {
-            unset($church->church_id);
-            unset($church->_joinData);
-        }
-
         unset($user->churches);
-        unset($user->user_id);
 
         $payload['exp'] = time() + 3600;
         $payload['user'] =  $user;

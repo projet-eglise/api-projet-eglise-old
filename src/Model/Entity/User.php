@@ -266,4 +266,35 @@ class User extends Entity
 
         $this->ChurchUserRoles->getConnection()->commit();
     }
+
+    /**
+     * Unset the variables needed for an api return.
+     *
+     * @return User
+     */
+    public function toApi(): User
+    {
+        unset($this->user_id);
+        unset($this->created_at);
+        unset($this->updated_at);
+
+        unset($this->churches);
+        unset($this->roles);
+
+        return $this;
+    }
+
+    public function toToken(): User
+    {
+        $this->hydrateChurches();
+        foreach ($this->churches as $church)
+            $church->toApi();
+
+        unset($this->user_id);
+        unset($this->created_at);
+        unset($this->updated_at);
+        unset($this->roles);
+
+        return $this;
+    }
 }

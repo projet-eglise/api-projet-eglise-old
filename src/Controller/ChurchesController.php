@@ -22,7 +22,6 @@ use Cake\ORM\TableRegistry;
 class ChurchesController extends AppController
 {
     private AddressesTable $Addresses;
-    private ChurchUsersTable $ChurchUsers;
     private UsersTable $Users;
 
     public function initialize(): void
@@ -32,113 +31,49 @@ class ChurchesController extends AppController
         $this->loadComponent('File');
 
         $this->Addresses = TableRegistry::getTableLocator()->get('Addresses');
-        $this->ChurchUsers = TableRegistry::getTableLocator()->get('ChurchUsers');
         $this->Users = TableRegistry::getTableLocator()->get('Users');
     }
 
     /**
-     * @todo refacto
+     * Returns the churches that a user can join.
      * @return void
      */
-    public function index()
+    public function joinable()
     {
-        $this->apiResponse(
-            $this->Churches->find('all', [
-                'fields' => [
-                    'uid',
-                    'name',
-                    'address__address' => 'address',
-                    'address__address2' => 'CONCAT(postal_code, \' \', city)',
-                    'address__city' => 'city',
-                    'pastor__name' => 'CONCAT(firstname, \' \', UPPER(lastname))'
-                ],
-                'contain' => [
-                    'Address', 'Pastor'
-                ]
-            ])->toArray()
-        );
-    }
+        $churches = $this->Churches->getJoinable($this->connectedUser);
 
-    /**
-     * @todo refacto
-     * @return void
-     */
-    public function getAllForJoin()
-    {
-        $myChurches = $this->ChurchUsers->find('list', [
-            'keyField' => 'church_id',
-            'valueField' => 'church_id',
-            'conditions' => ['user_id' => $this->connectedUser->user_id],
-        ])->toArray();
+        foreach ($churches as $church) {
+            $churchesToReturn[] = $church;
+        }
 
-        $this->apiResponse(
-            $this->Churches
-                ->find('all', [
-                    'fields' => [
-                        'uid',
-                        'name',
-                        'address__address' => 'address',
-                        'address__address2' => 'CONCAT(postal_code, \' \', city)',
-                        'address__city' => 'city',
-                        'pastor__name' => 'CONCAT(firstname, \' \', UPPER(lastname))'
-                    ],
-                    'contain' => [
-                        'Address', 'Pastor'
-                    ]
-                ])
-                ->where(count($myChurches) > 0 ? [
-                    "church_id NOT IN (" . implode(", ", $myChurches) . ")"
-                ] : [])
-                ->toArray()
-        );
+        return $this->apiResponse($churchesToReturn);
     }
 
     /**
      * View method
      *
-     * @todo refacto
      * @param string|null $churchUid
      */
     public function view(string $churchUid = null)
     {
-        $church = $this->Churches->findByUid(
-            $churchUid ?? $this->request->getParam('uid'),
-            [
-                'fields' => [
-                    'uid',
-                    'name',
-                    'address_uid' => 'Address.uid',
-                    'address_address' => 'Address.address',
-                    'address_postal_code' => 'Address.postal_code',
-                    'address_city' => 'Address.city',
-                ],
-                'contain' => ['Address']
-            ]
-        )->contain(
-            [
-                'Pastor' => ['fields' => [
-                    'uid',
-                    'firstname',
-                    'lastname',
-                    'email',
-                    'phone_number',
-                    'has_profile_picture',
-                    'profile_image_link',
-                ]],
-                'MainAdministrator' => ['fields' => [
-                    'uid',
-                    'firstname',
-                    'lastname',
-                    'email',
-                    'phone_number',
-                    'has_profile_picture',
-                    'profile_image_link',
-                ]],
-                'Address'
-            ]
-        )->first();
+        $church = $this->Churches
+            ->findByUid(
+                $churchUid ?? $this->request->getParam('uid'),
+                [
+                    'fields' => [
+                        'uid',
+                        'name',
+                        'address_uid' => 'Address.uid',
+                        'address_address' => 'Address.address',
+                        'address_postal_code' => 'Address.postal_code',
+                        'address_city' => 'Address.city',
+                    ],
+                    'contain' => ['Address']
+                ]
+            )->contain(['Address', 'Pastor', 'MainAdministrator'])
+            ->first();
 
-        return $this->apiResponse(['church' => $church]);
+        return $this->apiResponse(['church' => $church->toApi()]);
     }
 
     /**

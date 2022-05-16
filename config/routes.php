@@ -59,8 +59,7 @@ return static function (RouteBuilder $routes) {
             
             $protectedRoutes->get('/whoami', ['controller' => 'Authentication', 'action' => 'whoami']);
             
-            $protectedRoutes->get('/churches', ['controller' => 'Churches', 'action' => 'index']);
-            $protectedRoutes->get('/churches/forJoin', ['controller' => 'Churches', 'action' => 'getAllForJoin']);
+            $protectedRoutes->get('/churches/joinable', ['controller' => 'Churches', 'action' => 'joinable']);
             $protectedRoutes
             ->get('/church/{uid}', ['controller' => 'Churches', 'action' => 'view'])
             ->setPatterns(['uid' => '[a-z0-9]+']);

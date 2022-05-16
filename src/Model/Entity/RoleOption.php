@@ -34,4 +34,17 @@ class RoleOption extends Entity
         'created_at' => true,
         'updated_at' => true,
     ];
+
+    /**
+     * Unset the variables needed for an api return.
+     *
+     * @return Role
+     */
+    public function toApi(): RoleOption
+    {
+        unset($this->role_id);
+        unset($this->role_option_id);
+
+        return $this;
+    }
 }
