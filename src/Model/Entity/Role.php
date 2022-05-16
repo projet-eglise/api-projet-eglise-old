@@ -21,15 +21,6 @@ use Cake\ORM\TableRegistry;
  */
 class Role extends Entity
 {
-    /** List of options available for this role. */
-    private array $availableOptions;
-
-    private RoleOptionsTable $RoleOptions;
-
-    private $hydrated = [
-        'availableOptions' => false,
-    ];
-
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().
      *
@@ -47,6 +38,15 @@ class Role extends Entity
         'created_at' => true,
         'updated_at' => true,
     ];
+
+    private $hydrated = [
+        'availableOptions' => false,
+    ];
+
+    private RoleOptionsTable $RoleOptions;
+
+    /** List of options available for this role. */
+    private array $availableOptions;
 
     public function __construct(array $properties = [], array $options = [])
     {

@@ -44,13 +44,13 @@ class Church extends Entity
         'updated_at' => true,
     ];
 
-    private ?User $mainAdministrator;
-    private ?User $mainPastor;
-
     private $hydrated = [
         'mainAdministrator' => false,
         'mainPastor' => false,
     ];
+
+    private ?User $mainAdministrator;
+    private ?User $mainPastor;
 
     private ChurchUserRolesTable $ChurchUserRoles;
     private ChurchesTable $Churches;

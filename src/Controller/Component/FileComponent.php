@@ -16,7 +16,7 @@ use Laminas\Diactoros\UploadedFile;
 class FileComponent extends Component
 {
     protected $_defaultConfig = [];
-    private FilestackClient $filestackClient;
+    private FilestackClient $FilestackClient;
 
     /**
      * initialize class
@@ -25,7 +25,7 @@ class FileComponent extends Component
      */
     public function initialize(array $config): void
     {
-        $this->filestackClient = new FilestackClient(Configure::read('FilestackApiKey'));
+        $this->FilestackClient = new FilestackClient(Configure::read('FilestackApiKey'));
     }
 
     /**
@@ -57,7 +57,7 @@ class FileComponent extends Component
      */
     public function upload(string $fileLink): string
     {
-        $file = $this->filestackClient->upload($fileLink);
+        $file = $this->FilestackClient->upload($fileLink);
         return $file->url();
     }
 }

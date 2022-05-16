@@ -56,12 +56,6 @@ class AppController extends Controller
         $this->loadComponent('Authentication');
 
         $this->Users = TableRegistry::getTableLocator()->get('Users');
-
-        /*
-         * Enable the following component for recommended CakePHP form protection settings.
-         * see https://book.cakephp.org/4/en/controllers/components/form-protection.html
-         */
-        //$this->loadComponent('FormProtection');
     }
 
     /**
@@ -75,11 +69,13 @@ class AppController extends Controller
         $token = $this->request->getSession()->read('token');
         if(isset($token)) {
             $user = $this->request->getSession()->read('user');
-            if(!isset($user)) {
+
+            if(!isset($user))
                 $user = $this->Users->findByUid($this->Authentication->getTokenContent($token)['user']['uid'])->first();
-            }
 
             $this->connectedUser = $user;
+        } else {
+            $this->request->getSession()->delete('user');
         }
     }
 

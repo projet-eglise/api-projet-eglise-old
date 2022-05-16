@@ -6,7 +6,6 @@ use App\Model\Entity\User;
 use Cake\Controller\Component;
 use Cake\Core\Configure;
 use Cake\Http\Exception\BadRequestException;
-use Cake\ORM\TableRegistry;
 
 class AuthenticationComponent extends Component
 {

@@ -36,29 +36,6 @@ use Laminas\Diactoros\UploadedFile;
  */
 class User extends Entity
 {
-    private array $churches = [];
-    private array $roles = [];
-
-    private ChurchUsersTable $ChurchUsers;
-    private ChurchUserRolesTable $ChurchUserRoles;
-    private ChurchesTable $Churches;
-    private RolesTable $Roles;
-    private RoleOptionsTable $RoleOptions;
-    private FileComponent $File;
-
-    public function __construct(array $properties = [], array $options = [])
-    {
-        parent::__construct($properties, $options);
-
-        $this->ChurchUsers = TableRegistry::getTableLocator()->get('ChurchUsers');
-        $this->ChurchUserRoles = TableRegistry::getTableLocator()->get('ChurchUserRoles');
-        $this->Churches = TableRegistry::getTableLocator()->get('Churches');
-        $this->Roles = TableRegistry::getTableLocator()->get('Roles');
-        $this->RoleOptions = TableRegistry::getTableLocator()->get('RoleOptions');
-
-        $this->File = new FileComponent(new ComponentRegistry());
-    }
-
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().
      *
@@ -96,6 +73,29 @@ class User extends Entity
         'churches' => false,
         'roles' => false,
     ];
+
+    private ChurchUsersTable $ChurchUsers;
+    private ChurchUserRolesTable $ChurchUserRoles;
+    private ChurchesTable $Churches;
+    private RolesTable $Roles;
+    private RoleOptionsTable $RoleOptions;
+    private FileComponent $File;
+
+    private array $churches = [];
+    private array $roles = [];
+
+    public function __construct(array $properties = [], array $options = [])
+    {
+        parent::__construct($properties, $options);
+
+        $this->ChurchUsers = TableRegistry::getTableLocator()->get('ChurchUsers');
+        $this->ChurchUserRoles = TableRegistry::getTableLocator()->get('ChurchUserRoles');
+        $this->Churches = TableRegistry::getTableLocator()->get('Churches');
+        $this->Roles = TableRegistry::getTableLocator()->get('Roles');
+        $this->RoleOptions = TableRegistry::getTableLocator()->get('RoleOptions');
+
+        $this->File = new FileComponent(new ComponentRegistry());
+    }
 
     /**
      * Fills in the variable churches.
@@ -284,6 +284,11 @@ class User extends Entity
         return $this;
     }
 
+    /**
+     * Modifies variables to serve as tokens.
+     *
+     * @return User
+     */
     public function toToken(): User
     {
         $this->hydrateChurches();
