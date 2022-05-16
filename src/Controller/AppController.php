@@ -21,6 +21,8 @@ namespace App\Controller;
 use App\Model\Entity\User;
 use App\Model\Table\UsersTable;
 use Cake\Controller\Controller;
+use Cake\Datasource\ConnectionManager;
+use Cake\Datasource\Connection;
 use Cake\Event\EventInterface;
 use Cake\Http\Response;
 use Cake\ORM\TableRegistry;
@@ -66,11 +68,15 @@ class AppController extends Controller
      */
     public function beforeFilter(EventInterface $event)
     {
+        /** @var Connection */
+        $connection = ConnectionManager::get('default');
+        $connection->begin();
+
         $token = $this->request->getSession()->read('token');
-        if(isset($token)) {
+        if (isset($token)) {
             $user = $this->request->getSession()->read('user');
 
-            if(!isset($user))
+            if (!isset($user))
                 $user = $this->Users->findByUid($this->Authentication->getTokenContent($token)['user']['uid'])->first();
 
             $this->connectedUser = $user;
@@ -86,6 +92,9 @@ class AppController extends Controller
      */
     protected function apiResponse(array $data = [])
     {
+        /** @var Connection */
+        $connection = ConnectionManager::get('default');
+        $connection->commit();
         $this->sendResponse(200, $data);
     }
 

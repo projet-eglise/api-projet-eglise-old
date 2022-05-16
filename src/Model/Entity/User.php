@@ -238,7 +238,6 @@ class User extends Entity
             throw new InternalErrorException('Vous n\'appartenez pas à cette Eglise. Vous devez la rejoindre avant de choisir des rôles.');
         }
 
-        $this->ChurchUserRoles->getConnection()->begin();
         foreach ($roles as $value) {
             $role = $this->Roles->findByUid($value['role'])->first();
             $churchUserRole = $this->ChurchUserRoles->newEmptyEntity();
@@ -263,8 +262,6 @@ class User extends Entity
                 $hydrated['roles'] = false;
             }
         }
-
-        $this->ChurchUserRoles->getConnection()->commit();
     }
 
     /**

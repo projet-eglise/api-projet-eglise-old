@@ -117,8 +117,6 @@ class ChurchesController extends AppController
             'city' => $this->request->getData('church_city'),
         ]);
 
-        $this->Users->getConnection()->begin();
-
         if (!$pastorIsAdmin) {
             if (!$this->Users->save($pastor, ['checkRules' => false])) {
                 $errors = $pastor->getErrors();
@@ -156,7 +154,6 @@ class ChurchesController extends AppController
         $pastor->joinChurch($church);
         $church->addPastor($pastor);
 
-        $this->Users->getConnection()->commit();
         return $this->view($church->uid);
     }
 }
