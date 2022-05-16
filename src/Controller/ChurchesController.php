@@ -156,4 +156,18 @@ class ChurchesController extends AppController
 
         return $this->view($church->uid);
     }
+
+    public function join()
+    {
+        if (!$this->request->is('get'))
+            throw new MethodNotAllowedException('Utilisez une requête GET');
+
+        $church = $this->Churches->findByUid($this->request->getParam('uid'))->first();
+        if ($church == null)
+            throw new BadRequestException('Eglise inexistant.');
+
+        $this->connectedUser->joinChurch($church);
+
+        return $this->apiResponse();
+    }
 }

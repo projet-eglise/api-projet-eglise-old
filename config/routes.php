@@ -53,20 +53,23 @@ return static function (RouteBuilder $routes) {
          */
         $builder->post('/login', ['controller' => 'Authentication', 'action' => 'login']);
         $builder->post('/signin', ['controller' => 'Authentication', 'action' => 'signin']);
-        
+
         $builder->scope('', function (RouteBuilder $protectedRoutes) {
             $protectedRoutes->applyMiddleware('authentication');
-            
+
             $protectedRoutes->get('/whoami', ['controller' => 'Authentication', 'action' => 'whoami']);
-            
+
             $protectedRoutes->get('/churches/joinable', ['controller' => 'Churches', 'action' => 'joinable']);
             $protectedRoutes
-            ->get('/church/{uid}', ['controller' => 'Churches', 'action' => 'view'])
-            ->setPatterns(['uid' => '[a-z0-9]+']);
+                ->get('/church/{uid}', ['controller' => 'Churches', 'action' => 'view'])
+                ->setPatterns(['uid' => '[a-z0-9]+']);
+            $protectedRoutes
+                ->get('/church/{uid}/join', ['controller' => 'Churches', 'action' => 'join'])
+                ->setPatterns(['uid' => '[a-z0-9]+']);
             $protectedRoutes->post('/church/add', ['controller' => 'Churches', 'action' => 'add']);
-            
+
             $protectedRoutes->get('/roles', ['controller' => 'Roles', 'action' => 'index']);
-            
+
             $protectedRoutes->post('/user/{userUid}/addRolesInChurch/{churchUid}', ['controller' => 'Users', 'action' => 'addRolesInChurch']);
         });
 
