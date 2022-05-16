@@ -55,7 +55,7 @@ class AuthenticationComponent extends Component
      */
     public function generateJwt(User $user, array $payload = []): string
     {
-        $payload = array_merge($this->generageTokenContent($user), $payload);
+        $payload = array_merge($this->generateTokenContent($user), $payload);
         $headers_encoded = $this->base64urlEncode(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
         $payload_encoded = $this->base64urlEncode(json_encode($payload));
 
@@ -110,15 +110,11 @@ class AuthenticationComponent extends Component
      * @param User $user
      * @return array
      */
-    public function generageTokenContent(User $user): array
+    public function generateTokenContent(User $user): array
     {
-        $user->toToken();
-        $churches = $user->churches;
-        unset($user->churches);
-
         $payload['exp'] = time() + 3600;
-        $payload['user'] =  $user;
-        $payload['churches'] =  $churches;
+        $payload['user'] =  $user->toToken();
+        $payload['churches'] =  $user->getChurches();
 
         return $payload;
     }

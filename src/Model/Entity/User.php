@@ -145,6 +145,16 @@ class User extends Entity
         $this->has_profile_picture = true;
     }
 
+    public function getChurches(): array
+    {
+        $this->hydrateChurches();
+
+        foreach ($this->churches as $church)
+            $church->toApi();
+
+        return $this->churches;
+    }
+
     /**
      * Returns the ChurchUserId of the user based on a Church.
      *

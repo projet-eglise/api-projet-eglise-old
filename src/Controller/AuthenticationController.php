@@ -89,9 +89,7 @@ class AuthenticationController extends AppController
             throw new MethodNotAllowedException('Utilisez une requête GET');
         }
 
-        $token = $this->Authentication->getTokenContent($this->request->getSession()->read('token'));
-        $user = $this->Users->findByUid($token['user']['uid'])->first();
-        $data = $this->Authentication->generageTokenContent($user);
+        $data = $this->Authentication->generateTokenContent($this->connectedUser);
         unset($data['exp']);
 
         return $this->apiResponse($data);
