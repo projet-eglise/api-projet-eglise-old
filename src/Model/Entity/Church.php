@@ -99,7 +99,7 @@ class Church extends Entity
      * @param User $user
      * @return void
      */
-    public function addMainAdministrator(User $user)
+    public function addMainAdministrator(User $user, bool $validate = false)
     {
         $this->hydrateMainAdministrator();
 
@@ -113,6 +113,7 @@ class Church extends Entity
 
         $administrator = $this->ChurchUserRoles->newEntity([
             'uid' => uniqid(),
+            'validate' => $validate,
             'role_id' => 1,
             'church_user_id' => $user->getChurchUserId($this),
             'role_option_id' => null,
@@ -167,6 +168,40 @@ class Church extends Entity
      * @return Church
      */
     public function toApi(): Church
+    {
+        unset($this->church_id);
+        unset($this->address_id);
+        unset($this->pastor_id);
+        unset($this->main_administrator_id);
+        unset($this->created_at);
+        unset($this->updated_at);
+
+        if(isset($this->main_administrator)) {
+            $this->main_administrator->toApi();
+        }
+
+        if(isset($this->pastor)) {
+            $this->pastor->toApi();
+        }
+
+        if(isset($this->addres)) {
+            $this->addres->toApi();
+        }
+
+        $this->address = $this->addres;
+        unset($this->addres);
+        unset($mainAdministrator);
+        unset($mainPastor);
+
+        return $this;
+    }
+
+    /**
+     * Modifies variables to serve as tokens.
+     *
+     * @return Church
+     */
+    public function toToken(): Church
     {
         unset($this->church_id);
         unset($this->address_id);

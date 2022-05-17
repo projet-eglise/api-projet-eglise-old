@@ -70,7 +70,7 @@ return static function (RouteBuilder $routes) {
 
             $protectedRoutes->get('/roles', ['controller' => 'Roles', 'action' => 'index']);
 
-            $protectedRoutes->post('/user/{userUid}/addRolesInChurch/{churchUid}', ['controller' => 'Users', 'action' => 'addRolesInChurch']);
+            $protectedRoutes->post('/user/addRolesInChurch/{churchUid}', ['controller' => 'Users', 'action' => 'addRolesInChurch']);
         });
 
 

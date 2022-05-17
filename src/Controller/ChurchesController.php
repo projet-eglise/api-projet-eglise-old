@@ -149,7 +149,7 @@ class ChurchesController extends AppController
         }
 
         $this->connectedUser->joinChurch($church);
-        $church->addMainAdministrator($this->connectedUser);
+        $church->addMainAdministrator($this->connectedUser, true);
 
         $pastor->joinChurch($church);
         $church->addPastor($pastor);

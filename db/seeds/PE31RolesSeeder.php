@@ -120,13 +120,13 @@ class PE31RolesSeeder extends AbstractSeed
         $church_user_roles = $this->table('church_user_roles');
         $church_user_roles
             ->insert([
-                ['church_user_role_id' => 1, 'uid' => uniqid(), 'church_user_id' => 1, 'role_id' => 6, 'role_option_id' => 3],
-                ['church_user_role_id' => 2, 'uid' => uniqid(), 'church_user_id' => 2, 'role_id' => 1, 'role_option_id' => null],
-                ['church_user_role_id' => 3, 'uid' => uniqid(), 'church_user_id' => 2, 'role_id' => 7, 'role_option_id' => null],
-                ['church_user_role_id' => 4, 'uid' => uniqid(), 'church_user_id' => 3, 'role_id' => 1, 'role_option_id' => null],
-                ['church_user_role_id' => 5, 'uid' => uniqid(), 'church_user_id' => 3, 'role_id' => 7, 'role_option_id' => null],
-                ['church_user_role_id' => 6, 'uid' => uniqid(), 'church_user_id' => 3, 'role_id' => 6, 'role_option_id' => 3],
-                ['church_user_role_id' => 7, 'uid' => uniqid(), 'church_user_id' => 4, 'role_id' => 7, 'role_option_id' => null],
+                ['church_user_role_id' => 1, 'uid' => uniqid(), 'validate' => true, 'church_user_id' => 1, 'role_id' => 6, 'role_option_id' => 3],
+                ['church_user_role_id' => 2, 'uid' => uniqid(), 'validate' => true, 'church_user_id' => 2, 'role_id' => 1, 'role_option_id' => null],
+                ['church_user_role_id' => 3, 'uid' => uniqid(), 'validate' => true, 'church_user_id' => 2, 'role_id' => 7, 'role_option_id' => null],
+                ['church_user_role_id' => 4, 'uid' => uniqid(), 'validate' => true, 'church_user_id' => 3, 'role_id' => 1, 'role_option_id' => null],
+                ['church_user_role_id' => 5, 'uid' => uniqid(), 'validate' => true, 'church_user_id' => 3, 'role_id' => 7, 'role_option_id' => null],
+                ['church_user_role_id' => 6, 'uid' => uniqid(), 'validate' => true, 'church_user_id' => 3, 'role_id' => 6, 'role_option_id' => 3],
+                ['church_user_role_id' => 7, 'uid' => uniqid(), 'validate' => true, 'church_user_id' => 4, 'role_id' => 7, 'role_option_id' => null],
             ])
             ->saveData();
     }

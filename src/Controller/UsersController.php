@@ -35,17 +35,14 @@ class UsersController extends AppController
      */
     public function addRolesInChurch()
     {
-        $user = $this->Users->findByUid($this->request->getParam('userUid'))->first();
-        if ($user == null) {
-            throw new BadRequestException('Utilisateur inexistant.');
-        }
+        $user = $this->connectedUser;
 
         $church = $this->Churches->findByUid($this->request->getParam('churchUid'))->first();
         if ($church == null) {
             throw new BadRequestException('Eglise inexistant.');
         }
 
-        $user->addRoles(json_decode($this->request->getData('roles'), true), $church);
+        $user->addRoles($this->request->getData('roles') ?? [], $church);
 
         return $this->apiResponse();
     }

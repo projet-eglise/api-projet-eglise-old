@@ -56,6 +56,7 @@ final class PE31Roles extends AbstractMigration
         $church_user_roles = $this->table('church_user_roles', ['id' => 'church_user_role_id']);
         $church_user_roles
             ->addColumn('uid', 'string')
+            ->addColumn('validate', 'boolean', ["default" => false])
             ->addColumn('church_user_id', 'integer')
             ->addColumn('role_id', 'integer')
             ->addColumn('role_option_id', 'integer', ["null" => true, "default" => null])

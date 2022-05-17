@@ -108,6 +108,8 @@ class User extends Entity
                 'keyField' => 'church_id',
                 'valueField' => 'church_id',
                 'conditions' => ['user_id' => $this->user_id],
+                'contain' => 'Churches',
+                'order' => 'Churches.name',
             ])->toArray();
 
             foreach ($churchesIds as $churchId) {
@@ -163,9 +165,11 @@ class User extends Entity
      */
     public function getChurchUserId(Church $church)
     {
-        return $this->ChurchUsers->find('all', [
+        $churchUser = $this->ChurchUsers->find('all', [
             'conditions' => ['user_id' => $this->user_id, 'church_id' => $church->church_id],
-        ])->first()->church_user_id;
+        ])->first();
+
+        return isset($churchUser) ? $churchUser->church_user_id : null;
     }
 
     /**
@@ -209,6 +213,28 @@ class User extends Entity
         $this->hydrated['churches'] = false;
 
         return $churchUser;
+    }
+
+    public function hasAtLeastOneRole(Church $church): bool
+    {
+        $this->hydrateRoles();
+
+        $churchUserId = $this->getChurchUserId($church);
+        foreach ($this->roles as $role)
+            if($role->church_user_id === $churchUserId) return true;
+
+        return false;
+    }
+
+    public function hasAtLeastOneRoleValidate(Church $church): bool
+    {
+        $this->hydrateRoles();
+
+        $churchUserId = $this->getChurchUserId($church);
+        foreach ($this->roles as $role)
+            if($role->church_user_id === $churchUserId && $role->validate) return true;
+
+        return false;
     }
 
     /**
@@ -299,8 +325,12 @@ class User extends Entity
     public function toToken(): User
     {
         $this->hydrateChurches();
-        foreach ($this->churches as $church)
-            $church->toApi();
+        foreach ($this->churches as $church) {
+            $church->hasAtLeastOneRole = $this->hasAtLeastOneRole($church);
+            $church->hasAtLeastOneRoleValidate = $this->hasAtLeastOneRoleValidate($church);
+            $church->toToken();
+        }
+
 
         unset($this->user_id);
         unset($this->created_at);
