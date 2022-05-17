@@ -31,4 +31,18 @@ class Address extends Entity
         'postal_code' => true,
         'city' => true,
     ];
+
+    /**
+     * Unset the variables needed for an api return.
+     *
+     * @return Address
+     */
+    public function toApi(): Address
+    {
+        unset($this->address_id);
+        unset($this->created_at);
+        unset($this->updated_at);
+
+        return $this;
+    }
 }

@@ -5,7 +5,7 @@ namespace App\Controller\Component;
 use App\Model\Entity\User;
 use Cake\Controller\Component;
 use Cake\Core\Configure;
-use Cake\ORM\TableRegistry;
+use Cake\Http\Exception\BadRequestException;
 
 class AuthenticationComponent extends Component
 {
@@ -40,6 +40,9 @@ class AuthenticationComponent extends Component
      */
     public function hashPassword(string $password): string
     {
+        if (!preg_match('^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$^', $password))
+            throw new BadRequestException('Mot de passe non conforme.');
+
         return password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
     }
 
@@ -52,7 +55,7 @@ class AuthenticationComponent extends Component
      */
     public function generateJwt(User $user, array $payload = []): string
     {
-        $payload = array_merge($this->generageTokenContent($user), $payload);
+        $payload = array_merge($this->generateTokenContent($user), $payload);
         $headers_encoded = $this->base64urlEncode(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
         $payload_encoded = $this->base64urlEncode(json_encode($payload));
 
@@ -71,7 +74,7 @@ class AuthenticationComponent extends Component
     public function checkJwt(string $jwt): bool
     {
         $tokenParts = explode('.', $jwt);
-        if(count($tokenParts) !== 3) {
+        if (count($tokenParts) !== 3) {
             return false;
         }
 
@@ -107,30 +110,11 @@ class AuthenticationComponent extends Component
      * @param User $user
      * @return array
      */
-    public function generageTokenContent(User $user): array
+    public function generateTokenContent(User $user): array
     {
-        $Users = TableRegistry::getTableLocator()->get('Users');
-        $user = $Users->get($user->user_id, [
-            'fields' => ['user_id', 'uid', 'is_admin'],
-            'contain' => [
-                'Churches' => [
-                    'fields' => ['church_id', 'uid', 'name'],
-                ]
-            ]
-        ]);   
-        $churches = $user->churches;
-        
-        foreach ($churches as $church) {
-            unset($church->church_id);
-            unset($church->_joinData);
-        }
-
-        unset($user->churches);
-        unset($user->user_id);
-
         $payload['exp'] = time() + 3600;
-        $payload['user'] =  $user;
-        $payload['churches'] =  $churches;
+        $payload['user'] =  $user->toToken();
+        $payload['churches'] =  $user->getChurches();
 
         return $payload;
     }

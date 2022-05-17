@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model\Table;
@@ -58,50 +59,52 @@ class UsersTable extends Table
     public function validationDefault(Validator $validator): Validator
     {
         $validator
-            ->integer('user_id')
+            ->integer('user_id', "L'identifiant de l'utilisateur doit être un nombre")
             ->allowEmptyString('user_id', null, 'create');
 
         $validator
             ->scalar('uid')
             ->maxLength('uid', 255)
             ->requirePresence('uid', 'create')
-            ->notEmptyString('uid');
+            ->notEmptyString('uid', "L'uid ne peut pas être vide");
 
         $validator
             ->scalar('firstname')
             ->maxLength('firstname', 255)
-            ->notEmptyString('firstname');
+            ->notEmptyString('firstname', "Le prénom ne peut pas être vide");
 
         $validator
             ->scalar('lastname')
             ->maxLength('lastname', 255)
-            ->notEmptyString('lastname');
+            ->notEmptyString('lastname', "Le nom ne peut pas être vide");
 
         $validator
-            ->email('email')
+            ->email('email', false, "L'addresse mail ne convient pas")
             ->requirePresence('email', 'create')
-            ->notEmptyString('email');
+            ->notEmptyString('email', "Le mail ne peut pas être vide");
 
         $validator
             ->scalar('password')
             ->maxLength('password', 255)
             ->requirePresence('password', 'create')
-            ->notEmptyString('password');
+            ->notEmptyString('password', "Le mot de passe ne peut pas être vide");
 
         $validator
             ->scalar('phone_number')
+            ->regex('phone_number', '^\+([0-9]{2,3}) ([0-9 ]{9,})^', "Le numéro de téléphone ne correspond pas")
             ->maxLength('phone_number', 255)
-            ->notEmptyString('phone_number');
+            ->notEmptyString('phone_number', "Le numéro de téléphone ne peut pas être vide");
 
         $validator
-            ->date('birthdate')
-            ->notEmptyDate('birthdate');
+            ->date('birthdate', ['ymd'], "Date d'anniversaire non confome")
+            ->notEmptyDate('birthdate', "La date d'anniversaire ne peut pas être vide");
 
         $validator
             ->boolean('has_profile_picture')
             ->notEmptyFile('has_profile_picture');
 
         $validator
+            ->url('profile_image_link')
             ->scalar('profile_image_link')
             ->maxLength('profile_image_link', 255)
             ->allowEmptyFile('profile_image_link');
@@ -126,7 +129,7 @@ class UsersTable extends Table
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->isUnique(['email']), ['errorField' => 'email']);
+        $rules->add($rules->isUnique(['email']), ['errorField' => 'email', 'message' => "Cette adresse mail existe déjà dans la base de données"]);
 
         return $rules;
     }

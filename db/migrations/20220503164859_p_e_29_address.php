@@ -30,7 +30,7 @@ final class PE29Address extends AbstractMigration
 
         $churches = $this->table('churches');
         $churches
-            ->addColumn('address_id', 'integer', ['after' => 'church_id'])
+            ->addColumn('address_id', 'integer', ['after' => 'main_administrator_id'])
             ->addForeignKey('address_id', 'addresses', 'address_id', ['delete' => 'CASCADE', 'update' => 'CASCADE'])
             ->update();
     }

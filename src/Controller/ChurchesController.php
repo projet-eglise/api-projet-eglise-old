@@ -22,7 +22,6 @@ use Cake\ORM\TableRegistry;
 class ChurchesController extends AppController
 {
     private AddressesTable $Addresses;
-    private ChurchUsersTable $ChurchUsers;
     private UsersTable $Users;
 
     public function initialize(): void
@@ -32,57 +31,22 @@ class ChurchesController extends AppController
         $this->loadComponent('File');
 
         $this->Addresses = TableRegistry::getTableLocator()->get('Addresses');
-        $this->ChurchUsers = TableRegistry::getTableLocator()->get('ChurchUsers');
         $this->Users = TableRegistry::getTableLocator()->get('Users');
     }
 
-    public function index()
+    /**
+     * Returns the churches that a user can join.
+     * @return void
+     */
+    public function joinable()
     {
-        $this->apiResponse(
-            $this->Churches->find('all', [
-                'fields' => [
-                    'uid',
-                    'name',
-                    'address__address' => 'address',
-                    'address__address2' => 'CONCAT(postal_code, \' \', city)',
-                    'address__city' => 'city',
-                    'pastor__name' => 'CONCAT(firstname, \' \', UPPER(lastname))'
-                ],
-                'contain' => [
-                    'Address', 'Pastor'
-                ]
-            ])->toArray()
-        );
-    }
+        $churches = $this->Churches->getJoinable($this->connectedUser);
 
-    public function getAllForJoin()
-    {
-        $myChurches = $this->ChurchUsers->find('list', [
-            'keyField' => 'church_id',
-            'valueField' => 'church_id',
-            'conditions' => ['user_id' => $this->getUserId()],
-        ])->toArray();
+        foreach ($churches as $church) {
+            $churchesToReturn[] = $church;
+        }
 
-        $this->apiResponse(
-            $this->Churches
-                ->find('all', [
-                    'fields' => [
-                        'uid',
-                        'name',
-                        'address__address' => 'address',
-                        'address__address2' => 'CONCAT(postal_code, \' \', city)',
-                        'address__city' => 'city',
-                        'pastor__name' => 'CONCAT(firstname, \' \', UPPER(lastname))'
-                    ],
-                    'contain' => [
-                        'Address', 'Pastor'
-                    ]
-                ])
-                ->where([
-                    "church_id NOT IN (".implode(", ", $myChurches).")"
-                ])
-                ->toArray()
-        );
+        return $this->apiResponse($churchesToReturn);
     }
 
     /**
@@ -92,40 +56,24 @@ class ChurchesController extends AppController
      */
     public function view(string $churchUid = null)
     {
-        $church = $this->Churches->findByUid($churchUid ?? $this->request->getParam('uid'), ['fields' => ['church_id']])->toArray()[0];
-        $church = $this->Churches->get($church->church_id, [
-            'fields' => [
-                'uid',
-                'name',
-                'address_uid' => 'Address.uid',
-                'address_address' => 'Address.address',
-                'address_postal_code' => 'Address.postal_code',
-                'address_city' => 'Address.city',
-            ],
-            'contain' => [
-                'Pastor' => ['fields' => [
-                    'uid',
-                    'firstname',
-                    'lastname',
-                    'email',
-                    'phone_number',
-                    'has_profile_picture',
-                    'profile_image_link',
-                ]],
-                'MainAdministrator' => ['fields' => [
-                    'uid',
-                    'firstname',
-                    'lastname',
-                    'email',
-                    'phone_number',
-                    'has_profile_picture',
-                    'profile_image_link',
-                ]],
-                'Address'
-            ]
-        ]);
+        $church = $this->Churches
+            ->findByUid(
+                $churchUid ?? $this->request->getParam('uid'),
+                [
+                    'fields' => [
+                        'uid',
+                        'name',
+                        'address_uid' => 'Address.uid',
+                        'address_address' => 'Address.address',
+                        'address_postal_code' => 'Address.postal_code',
+                        'address_city' => 'Address.city',
+                    ],
+                    'contain' => ['Address']
+                ]
+            )->contain(['Address', 'Pastor', 'MainAdministrator'])
+            ->first();
 
-        return $this->apiResponse(['church' => $church]);
+        return $this->apiResponse(['church' => $church->toApi()]);
     }
 
     /**
@@ -138,127 +86,88 @@ class ChurchesController extends AppController
         if (!$this->request->is('post'))
             throw new MethodNotAllowedException('Utilisez une requête POST');
 
-        if (is_null($this->request->getData('pastor_firstname')))
-            throw new BadRequestException('Prénom du responsable non renseignée.');
-
-        if ($this->request->getData('pastor_firstname') === '')
-            throw new BadRequestException('Prénom du responsable vide.');
-
-
-        if (is_null($this->request->getData('pastor_lastname')))
-            throw new BadRequestException('Nom du responsable non renseignée.');
-
-        if ($this->request->getData('pastor_lastname') === '')
-            throw new BadRequestException('Nom du responsable vide.');
-
-        if (is_null($this->request->getData('pastor_email')))
-            throw new BadRequestException('Adresse mail du responsable non renseignée.');
-
-        if (!filter_var($this->request->getData('pastor_email'), FILTER_VALIDATE_EMAIL))
-            throw new BadRequestException('Adresse mail du responsable invalide.');
-
-        $existingUser = $this->Users->findByEmail($this->request->getData('pastor_email'))->toArray();
-        $pastorIsAdmin = isset($existingUser[0]) && $existingUser[0]->email === $this->request->getData('pastor_email');
-        if (count($existingUser) !== 0 && !$pastorIsAdmin)
-            throw new BadRequestException('Cette adresse mail du responsable est déjà affectée à un compte.');
-
-        if (is_null($this->request->getData('church_name')))
-            throw new BadRequestException('Nom de l\'Eglise non renseignée.');
-
-        if ($this->request->getData('church_name') === '')
-            throw new BadRequestException('Nom de l\'Eglise vide.');
-
-        if (is_null($this->request->getData('church_address')))
-            throw new BadRequestException('Adresse de l\'Eglise non renseignée.');
-
-        if ($this->request->getData('church_address') === '')
-            throw new BadRequestException('Adresse de l\'Eglise vide.');
-
-        if (is_null($this->request->getData('church_postal_code')))
-            throw new BadRequestException('Code postal de l\'Eglise non renseignée.');
-
-        if ($this->request->getData('church_postal_code') === '')
-            throw new BadRequestException('Code postal de l\'Eglise vide.');
-
-        if (!preg_match('^[0-9][0-9A-B][0-9]{3}^', $this->request->getData('church_postal_code')))
-            throw new BadRequestException('Code postal de l\'Eglise invalide.');
-
-        if (is_null($this->request->getData('church_city')))
-            throw new BadRequestException('Ville de l\'Eglise non renseignée.');
-
-        if ($this->request->getData('church_city') === '')
-            throw new BadRequestException('Ville de l\'Eglise vide.');
-
-        $pastor = $pastorIsAdmin ? $existingUser[0] : $this->Users->newEntity([
+        $pastor = $this->Users->newEntity([
             'uid' => uniqid(),
             'firstname' => $this->request->getData('pastor_firstname'),
             'lastname' => $this->request->getData('pastor_lastname'),
             'email' => $this->request->getData('pastor_email'),
             'password' => 'X',
-            'phone_number' => 'X',
+            'phone_number' => '+00 0 00 00 00 00',
             'birthdate' => '1900-01-01',
             'has_profile_picture' => false,
         ]);
 
-        if (count($pastor->getErrors()) > 0)
-            throw new HttpException("Une erreur est survenu lors de la création du pasteur.\n" . json_encode($pastor->getErrors()), 422);
+        $pastorUser = $this->Users->findByEmail($pastor->email)->first();
+
+        $pastorIsAdmin = isset($pastorUser) && $pastorUser->email === $this->connectedUser->email;
+        if (isset($pastorUser) && !$pastorIsAdmin)
+            throw new BadRequestException('Cette adresse mail est déjà affectée à un compte.');
+
+        $pastor = $pastorIsAdmin ? $pastorUser : $pastor;
 
         $church = $this->Churches->newEntity([
             'uid' => uniqid(),
             'name' => $this->request->getData('church_name'),
-            'pastor_id' => $pastor->user_id,
-            'main_administrator_id' => $this->getUserId(),
         ]);
 
-        if (count($church->getErrors()) > 0)
-            throw new HttpException("Une erreur est survenu lors de la création de l'Eglise.\n" . json_encode($church->getErrors()), 422);
-
-        $address = $this->Addresses->newEntity([
+        $churchAddress = $this->Addresses->newEntity([
             'uid' => uniqid(),
             'address' => $this->request->getData('church_address'),
             'postal_code' => $this->request->getData('church_postal_code'),
             'city' => $this->request->getData('church_city'),
         ]);
 
-        if (count($church->getErrors()) > 0)
-            throw new HttpException("Une erreur est survenu lors de la création de l'adresse de l'Eglise.\n" . json_encode($church->getErrors()), 422);
+        if (!$pastorIsAdmin) {
+            if (!$this->Users->save($pastor, ['checkRules' => false])) {
+                $errors = $pastor->getErrors();
+                if (empty($errors))
+                    throw new BadRequestException('Une erreur est survenue lors de l\'enregistrement');
 
-        if (!$pastorIsAdmin)
-            if (!$this->Users->save($pastor))
-                throw new InternalErrorException("Une erreur est survenu lors de l'ajout du pasteur.\n");
+                $field = reset($errors);
+                throw new BadRequestException(reset($field));
+            }
+        }
 
-        if (!$this->Addresses->save($address, ['associated' => false]))
-            throw new InternalErrorException("Une erreur est survenu lors de l'ajout de l'adresse de l'Eglise.\n");
+        if (!$this->Addresses->save($churchAddress, ['associated' => false])) {
+            $errors = $churchAddress->getErrors();
+            if (empty($errors))
+                throw new BadRequestException('Une erreur est survenue lors de l\'enregistrement');
 
-        $church->pastor_id = $pastor->user_id;
-        $church->address_id = $address->address_id;
+            $field = reset($errors);
+            throw new BadRequestException(reset($field));
+        }
 
-        if (!$this->Churches->save($church, ['associated' => false]))
-            throw new InternalErrorException("Une erreur est survenu lors de l'ajout de l'Eglise.\n");
+        $church->address_id = $churchAddress->address_id;
 
-        $churchPastor = $this->ChurchUsers->newEntity([
-            'church_id' => $church->church_id,
-            'user_id' => $church->pastor_id,
-        ]);
+        if (!$this->Churches->save($church, ['associated' => false])) {
+            $errors = $church->getErrors();
+            if (empty($errors))
+                throw new BadRequestException('Une erreur est survenue lors de l\'enregistrement');
 
-        $churchMainAdministrator = $this->ChurchUsers->newEntity([
-            'church_id' => $church->church_id,
-            'user_id' => $church->main_administrator_id,
-        ]);
+            $field = reset($errors);
+            throw new BadRequestException(reset($field));
+        }
 
-        if (count($churchPastor->getErrors()) > 0)
-            throw new HttpException("Une erreur est survenu lors de la création du pasteur.\n" . json_encode($pastor->getErrors()), 422);
+        $this->connectedUser->joinChurch($church);
+        $church->addMainAdministrator($this->connectedUser, true);
 
-        if (count($churchMainAdministrator->getErrors()) > 0)
-            throw new HttpException("Une erreur est survenu lors de la création du pasteur.\n" . json_encode($pastor->getErrors()), 422);
-
-        if (!$pastorIsAdmin)
-            if (!$this->ChurchUsers->save($churchPastor, ['associated' => false]))
-                throw new InternalErrorException("Une erreur est survenu lors de l'ajout de l'Eglise.\n");
-
-        if (!$this->ChurchUsers->save($churchMainAdministrator, ['associated' => false]))
-            throw new InternalErrorException("Une erreur est survenu lors de l'ajout de l'Eglise.\n");
+        $pastor->joinChurch($church);
+        $church->addPastor($pastor);
 
         return $this->view($church->uid);
+    }
+
+    public function join()
+    {
+        if (!$this->request->is('get'))
+            throw new MethodNotAllowedException('Utilisez une requête GET');
+
+        $church = $this->Churches->findByUid($this->request->getParam('uid'))->first();
+        if ($church == null)
+            throw new BadRequestException('Eglise inexistant.');
+
+        $this->connectedUser->joinChurch($church);
+
+        return $this->apiResponse();
     }
 }

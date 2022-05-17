@@ -18,8 +18,12 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Model\Entity\User;
 use App\Model\Table\UsersTable;
 use Cake\Controller\Controller;
+use Cake\Datasource\ConnectionManager;
+use Cake\Datasource\Connection;
+use Cake\Event\EventInterface;
 use Cake\Http\Response;
 use Cake\ORM\TableRegistry;
 
@@ -34,6 +38,7 @@ use Cake\ORM\TableRegistry;
 class AppController extends Controller
 {
     private UsersTable $Users;
+    protected User $connectedUser;
 
     /**
      * Initialization hook method.
@@ -53,13 +58,31 @@ class AppController extends Controller
         $this->loadComponent('Authentication');
 
         $this->Users = TableRegistry::getTableLocator()->get('Users');
+    }
 
+    /**
+     * beforeFilter callback.
+     *
+     * @param \Cake\Event\EventInterface $event Event.
+     * @return \Cake\Http\Response|null|void
+     */
+    public function beforeFilter(EventInterface $event)
+    {
+        /** @var Connection */
+        $connection = ConnectionManager::get('default');
+        $connection->begin();
 
-        /*
-         * Enable the following component for recommended CakePHP form protection settings.
-         * see https://book.cakephp.org/4/en/controllers/components/form-protection.html
-         */
-        //$this->loadComponent('FormProtection');
+        $token = $this->request->getSession()->read('token');
+        if (isset($token)) {
+            $user = $this->request->getSession()->read('user');
+
+            if (!isset($user))
+                $user = $this->Users->findByUid($this->Authentication->getTokenContent($token)['user']['uid'])->first();
+
+            $this->connectedUser = $user;
+        } else {
+            $this->request->getSession()->delete('user');
+        }
     }
 
     /**
@@ -69,6 +92,9 @@ class AppController extends Controller
      */
     protected function apiResponse(array $data = [])
     {
+        /** @var Connection */
+        $connection = ConnectionManager::get('default');
+        $connection->commit();
         $this->sendResponse(200, $data);
     }
 
@@ -128,15 +154,5 @@ class AppController extends Controller
     {
         $response['data'] = $data;
         return $response;
-    }
-
-    /**
-     * Returns the id of the connected user.
-     *
-     * @return integer
-     */
-    protected function getUserId(): int
-    {
-        return $this->Users->findByUid($this->Authentication->getTokenContent($this->request->getSession()->read('token'))['user']['uid'])->toArray()[0]->user_id;
     }
 }

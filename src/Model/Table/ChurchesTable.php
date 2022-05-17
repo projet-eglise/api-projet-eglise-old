@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
+use App\Model\Entity\User;
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
+use Cake\ORM\TableRegistry;
 use Cake\Validation\Validator;
 
 /**
@@ -31,6 +33,8 @@ use Cake\Validation\Validator;
  */
 class ChurchesTable extends Table
 {
+    private ChurchUsersTable $ChurchUsers;
+
     /**
      * Initialize method
      *
@@ -69,6 +73,8 @@ class ChurchesTable extends Table
             'joinType' => 'INNER',
             'className' => 'Addresses',
         ]);
+
+        $this->ChurchUsers = TableRegistry::getTableLocator()->get('ChurchUsers');
     }
 
     /**
@@ -93,7 +99,7 @@ class ChurchesTable extends Table
             ->scalar('name')
             ->maxLength('name', 255)
             ->requirePresence('name', 'create')
-            ->notEmptyString('name');
+            ->notEmptyString('name', "Nom de l'Eglise incorrect");
 
         $validator
             ->dateTime('created_at')
@@ -116,5 +122,39 @@ class ChurchesTable extends Table
     public function buildRules(RulesChecker $rules): RulesChecker
     {
         return $rules;
+    }
+
+    /**
+     * Returns the churches that a user can join.
+     *
+     * @param User $user
+     * @return array
+     */
+    public function getJoinable(User $user): array
+    {
+        $myChurches = $this->ChurchUsers->find('list', [
+            'keyField' => 'church_id',
+            'valueField' => 'church_id',
+            'conditions' => ['user_id' => $user->user_id],
+        ])->toArray();
+
+        return $this
+            ->find('all', [
+                'fields' => [
+                    'uid',
+                    'name',
+                    'address__address' => 'address',
+                    'address__address2' => 'CONCAT(postal_code, \' \', city)',
+                    'address__city' => 'city',
+                    'pastor__name' => 'CONCAT(firstname, \' \', UPPER(lastname))',
+                ],
+                'contain' => [
+                    'Address', 'Pastor'
+                ]
+            ])
+            ->where(count($myChurches) > 0 ? [
+                "church_id NOT IN (" . implode(", ", $myChurches) . ")"
+            ] : [])
+            ->toArray();
     }
 }

@@ -6,16 +6,17 @@ namespace App\Model\Entity;
 use Cake\ORM\Entity;
 
 /**
- * ChurchUser Entity
+ * RoleOption Entity
  *
- * @property int $church_user_id
+ * @property int $role_option_id
  * @property string $uid
- * @property int $user_id
- * @property int $church_id
+ * @property string $name
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime|null $updated_at
+ *
+ * @property \App\Model\Entity\Role $role
  */
-class ChurchUser extends Entity
+class RoleOption extends Entity
 {
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().
@@ -28,9 +29,22 @@ class ChurchUser extends Entity
      */
     protected $_accessible = [
         'uid' => true,
-        'user_id' => true,
-        'church_id' => true,
+        'name' => true,
+        'role_id' => true,
         'created_at' => true,
         'updated_at' => true,
     ];
+
+    /**
+     * Unset the variables needed for an api return.
+     *
+     * @return Role
+     */
+    public function toApi(): RoleOption
+    {
+        unset($this->role_id);
+        unset($this->role_option_id);
+
+        return $this;
+    }
 }

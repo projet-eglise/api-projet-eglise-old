@@ -6,16 +6,17 @@ namespace App\Model\Entity;
 use Cake\ORM\Entity;
 
 /**
- * ChurchUser Entity
+ * ChurchUserRole Entity
  *
- * @property int $church_user_id
+ * @property int $church_user_role_id
  * @property string $uid
- * @property int $user_id
- * @property int $church_id
+ * @property int $church_user_id
+ * @property int $role_id
+ * @property int $role_option_id
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime|null $updated_at
  */
-class ChurchUser extends Entity
+class ChurchUserRole extends Entity
 {
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().
@@ -28,8 +29,9 @@ class ChurchUser extends Entity
      */
     protected $_accessible = [
         'uid' => true,
-        'user_id' => true,
-        'church_id' => true,
+        'church_user_id' => true,
+        'role_id' => true,
+        'role_option_id' => true,
         'created_at' => true,
         'updated_at' => true,
     ];

@@ -43,6 +43,9 @@ class ChurchUsersTable extends Table
         $this->setTable('church_users');
         $this->setDisplayField('church_user_id');
         $this->setPrimaryKey('church_user_id');
+
+        $this->belongsTo('Churches');
+        $this->belongsTo('Users');
     }
 
     /**

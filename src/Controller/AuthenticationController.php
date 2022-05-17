@@ -38,15 +38,13 @@ class AuthenticationController extends AppController
             throw new BadRequestException('Email ou mot de passe vide');
         }
 
-        $user = $this->Users->findByEmail($email)->toArray();
-        if (count($user) !== 1) {
-            throw new NotFoundException('Identifiants invalide');
+        $user = $this->Users->findByEmail($email)->first();
+        if ($user === null) {
+            throw new NotFoundException('Identifiants invalides');
         }
 
-        $user = $user[0];
-
         if (!$this->Authentication->passwordVerify($password, $user->password)) {
-            throw new UnauthorizedException('Identifiants invalide');
+            throw new UnauthorizedException('Identifiants invalides');
         }
 
         return $this->apiResponse(['token' => $this->Authentication->generateJwt($user)]);
@@ -58,88 +56,25 @@ class AuthenticationController extends AppController
             throw new MethodNotAllowedException('Utilisez une requête POST');
         }
 
-        if (is_null($this->request->getData('firstname'))) {
-            throw new BadRequestException('Prénom non renseignée.');
-        }
-
-        if ($this->request->getData('firstname') === '') {
-            throw new BadRequestException('Prénom vide.');
-        }
-
-        if (is_null($this->request->getData('lastname'))) {
-            throw new BadRequestException('Nom non renseignée.');
-        }
-
-        if ($this->request->getData('lastname') === '') {
-            throw new BadRequestException('Nom vide.');
-        }
-
-        if (is_null($this->request->getData('email'))) {
-            throw new BadRequestException('Adresse mail non renseignée.');
-        }
-
-        if (!filter_var($this->request->getData('email'), FILTER_VALIDATE_EMAIL)) {
-            throw new BadRequestException('Adresse mail invalide.');
-        }
-
-        if (count($this->Users->findByEmail($this->request->getData('email'))->toArray()) !== 0) {
-            throw new BadRequestException('Cette adresse mail est déjà affectée à un compte.');
-        }
-
-        if (is_null($this->request->getData('password'))) {
-            throw new BadRequestException('Mot de passe non renseignée.');
-        }
-
-        if (!preg_match('^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&^])[A-Za-z\d@$!%*#?&^]{8,}$^', $this->request->getData('password'))) {
-            throw new BadRequestException('Mot de passe non conforme.');
-        }
-
-        if (is_null($this->request->getData('birthdate'))) {
-            throw new BadRequestException('Date d\'anniversaire non renseignée.');
-        }
-
-        $d = DateTime::createFromFormat('Y-m-d', $this->request->getData('birthdate'));
-        if (!($d && $d->format('Y-m-d') === $this->request->getData('birthdate'))) {
-            throw new BadRequestException('Anniversaire invalide.');
-        }
-
-        if (is_null($this->request->getData('phone_number'))) {
-            throw new BadRequestException('Numéro de téléphone non renseignée.');
-        }
-
-        if (!preg_match('^\+([0-9]{2,3}) ([0-9 ]{9,})^', $this->request->getData('phone_number'))) {
-            throw new BadRequestException('Numéro de téléphone non conforme.');
-        }
-
         $user = $this->Users->newEntity($this->request->getData());
         $user->uid = uniqid();
         $user->password = $this->Authentication->hashPassword($this->request->getData('password'));
 
-        if ($this->request->getData('profile_image') !== null) {
-            $image = $this->request->getData('profile_image');
-            if ($image->getSize() > 10000000) {
-                throw new BadRequestException("Votre image est trop grosse ...");
-            }
-            if ($image->getSize() == 0) {
-                throw new BadRequestException("L'image n'a pas de taille");
-            }
-
-            $imageSize = @getimagesize($image->getStream()->getMetadata()["uri"]);
-            if (!in_array($image->getClientMediaType(),  ['image/jpg', 'image/png', 'image/jpeg']) || $imageSize === false) {
-                throw new BadRequestException("Nous avons un problème avec votre image");
-            }
-
-            $user->profile_image_link = $this->File->upload($image->getStream()->getMetadata()["uri"]);
-
-            $user->has_profile_picture = true;
-        }
-
-        if (!empty($user->getErrors())) {
-            throw new BadRequestException('Une erreur est survenue.');
-        }
-
         if (!$this->Users->save($user)) {
-            throw new BadRequestException('Une erreur est survenue.');
+            $errors = $user->getErrors();
+            if (empty($errors))
+                throw new BadRequestException('Une erreur est survenue lors de l\'enregistrement');
+
+            $field = reset($errors);
+            throw new BadRequestException(reset($field));
+        }
+
+        $image = $this->request->getData('profile_image');
+        if ($image !== null)
+            $user->addProfilePicture($image);
+        
+        if (!$this->Users->save($user)) {
+            throw new BadRequestException('Une erreur est survenue lors de la mise en ligne de l\'image');
         }
 
         return $this->apiResponse(['token' => $this->Authentication->generateJwt($user)]);
@@ -154,9 +89,7 @@ class AuthenticationController extends AppController
             throw new MethodNotAllowedException('Utilisez une requête GET');
         }
 
-        $token = $this->Authentication->getTokenContent($this->request->getSession()->read('token'));
-        $user = $this->Users->findByUid($token['user']['uid'])->toArray()[0];
-        $data = $this->Authentication->generageTokenContent($user);
+        $data = $this->Authentication->generateTokenContent($this->connectedUser);
         unset($data['exp']);
 
         return $this->apiResponse($data);

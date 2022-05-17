@@ -66,12 +66,18 @@ return static function (RouteBuilder $routes) {
 
             $protectedRoutes->get('/whoami', ['controller' => 'Authentication', 'action' => 'whoami']);
 
-            $protectedRoutes->get('/churches', ['controller' => 'Churches', 'action' => 'index']);
-            $protectedRoutes->get('/churches/forJoin', ['controller' => 'Churches', 'action' => 'getAllForJoin']);
+            $protectedRoutes->get('/churches/joinable', ['controller' => 'Churches', 'action' => 'joinable']);
             $protectedRoutes
                 ->get('/church/{uid}', ['controller' => 'Churches', 'action' => 'view'])
                 ->setPatterns(['uid' => '[a-z0-9]+']);
+            $protectedRoutes
+                ->get('/church/{uid}/join', ['controller' => 'Churches', 'action' => 'join'])
+                ->setPatterns(['uid' => '[a-z0-9]+']);
             $protectedRoutes->post('/church/add', ['controller' => 'Churches', 'action' => 'add']);
+
+            $protectedRoutes->get('/roles', ['controller' => 'Roles', 'action' => 'index']);
+
+            $protectedRoutes->post('/user/addRolesInChurch/{churchUid}', ['controller' => 'Users', 'action' => 'addRolesInChurch']);
         });
 
 
