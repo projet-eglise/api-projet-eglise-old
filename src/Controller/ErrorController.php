@@ -16,7 +16,6 @@ declare(strict_types=1);
  */
 namespace App\Controller;
 
-use Cake\Core\Configure;
 use Cake\Event\EventInterface;
 
 /**
@@ -34,6 +33,7 @@ class ErrorController extends AppController
     public function initialize(): void
     {
         $this->loadComponent('RequestHandler');
+        parent::initialize();
     }
 
     /**
@@ -44,6 +44,7 @@ class ErrorController extends AppController
      */
     public function beforeFilter(EventInterface $event)
     {
+        parent::beforeFilter($event);
     }
 
     /**
@@ -57,14 +58,12 @@ class ErrorController extends AppController
         parent::beforeRender($event);
         $viewBuilder = $event->getSubject()->viewBuilder();
 
-        if(Configure::read('debug')) {
-            $data = [
-                'file' => $viewBuilder->getVar('file'),
-                'line' => $viewBuilder->getVar('line'),
-            ];
-        }
-
-        $data['error'] = $viewBuilder->getVar('message');
+        $data = [
+            'file' => $viewBuilder->getVar('file'),
+            'line' => $viewBuilder->getVar('line'),
+            'error' => $viewBuilder->getVar('message'),
+            'traceback' => $viewBuilder->getVar('trace'),
+        ];
 
         $this->errorResponse($viewBuilder->getVar('code'), $data);
     }
@@ -77,5 +76,6 @@ class ErrorController extends AppController
      */
     public function afterFilter(EventInterface $event)
     {
+        parent::afterFilter($event);
     }
 }

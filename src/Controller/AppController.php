@@ -18,9 +18,12 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Model\Entity\Log;
 use App\Model\Entity\User;
+use App\Model\Table\LogsTable;
 use App\Model\Table\UsersTable;
 use Cake\Controller\Controller;
+use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use Cake\Datasource\Connection;
 use Cake\Event\EventInterface;
@@ -37,8 +40,11 @@ use Cake\ORM\TableRegistry;
  */
 class AppController extends Controller
 {
+    private LogsTable $Logs;
     private UsersTable $Users;
+
     protected User $connectedUser;
+    private static Log $log;
 
     /**
      * Initialization hook method.
@@ -57,7 +63,13 @@ class AppController extends Controller
         $this->loadComponent('Flash');
         $this->loadComponent('Authentication');
 
+        $this->Logs = TableRegistry::getTableLocator()->get('Logs');
         $this->Users = TableRegistry::getTableLocator()->get('Users');
+
+        $this->log = $this->Logs->newEntity([
+            'uid' => uniqid(),
+            'start_timestamp' => microtime(true),
+        ]);
     }
 
     /**
@@ -79,6 +91,7 @@ class AppController extends Controller
             if (!isset($user))
                 $user = $this->Users->findByUid($this->Authentication->getTokenContent($token)['user']['uid'])->first();
 
+            $this->log->user_id = $user->user_id;
             $this->connectedUser = $user;
         } else {
             $this->request->getSession()->delete('user');
@@ -106,6 +119,9 @@ class AppController extends Controller
      */
     protected function errorResponse(int $code, array $data = [])
     {
+        /** @var Connection */
+        $connection = ConnectionManager::get('default');
+        $connection->rollback();
         $this->sendResponse($code, $data);
     }
 
@@ -120,9 +136,34 @@ class AppController extends Controller
         $response['code'] = $statusCode;
         $response['message'] = (new Response(['status' => $statusCode]))->getReasonPhrase();
 
-        $response = $statusCode === 200 ?
-            $this->okResponseBuilder($response, $data) :
-            $this->errorResponseBuilder($response, $data);
+        $this->log->params = json_encode($this->getRequest()->getData());
+        $this->log->route = $this->getRequest()->getUri()->__toString();
+        $this->log->method = $this->getRequest()->getMethod();
+        $this->log->ip_address = $this->getRequest()->clientIp();
+        $this->log->end_timestamp = microtime(true);
+        $this->log->response_code = $statusCode;
+
+        if ($statusCode === 200) {
+            $response = $this->okResponseBuilder($response, $data);
+            $this->log->response = json_encode($data);
+            $this->log->viewed = true;
+            $this->Logs->save($this->log);
+        } else {
+            $this->log->trace = json_encode($data['traceback']);
+            $this->log->file = "{$data['file']}({$data['line']})";
+            $this->log->viewed = false;
+
+            unset($data['traceback']);
+            if (Configure::read('debug')) {
+                unset($data['file']);
+                unset($data['line']);
+            }
+
+            $this->log->response = json_encode($data);
+            $this->Logs->save($this->log);
+
+            $response = $this->errorResponseBuilder($response, $data);
+        }
 
         $this->set($response);
 
