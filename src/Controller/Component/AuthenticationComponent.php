@@ -6,6 +6,7 @@ use App\Model\Entity\User;
 use Cake\Controller\Component;
 use Cake\Core\Configure;
 use Cake\Http\Exception\BadRequestException;
+use Cake\ORM\TableRegistry;
 
 class AuthenticationComponent extends Component
 {
@@ -90,7 +91,11 @@ class AuthenticationComponent extends Component
         $signature = hash_hmac('SHA256', $base64_url_header . "." . $base64_url_payload, Configure::read('Security.salt'), true);
         $base64_url_signature = $this->base64urlEncode($signature);
 
-        return !$is_token_expired && ($base64_url_signature === $signature_provided);
+        $BlacklistedTokens = TableRegistry::getTableLocator()->get('BlacklistedTokens');
+        $not_expired = $BlacklistedTokens->findByToken($jwt)->count() === 0;
+        if($BlacklistedTokens->findByToken($jwt)->count() !== 0) throw new BadRequestException("Token blacklisté");
+
+        return !$is_token_expired && ($base64_url_signature === $signature_provided) && $not_expired;
     }
 
     /**

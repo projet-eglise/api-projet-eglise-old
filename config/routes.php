@@ -65,6 +65,7 @@ return static function (RouteBuilder $routes) {
             $protectedRoutes->applyMiddleware('authentication');
 
             $protectedRoutes->get('/whoami', ['controller' => 'Authentication', 'action' => 'whoami']);
+            $protectedRoutes->get('/logout', ['controller' => 'Authentication', 'action' => 'logout']);
 
             $protectedRoutes->get('/churches/joinable', ['controller' => 'Churches', 'action' => 'joinable']);
             $protectedRoutes

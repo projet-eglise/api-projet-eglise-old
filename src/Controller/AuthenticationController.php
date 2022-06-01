@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Model\Table\BlacklistedTokensTable;
 use App\Model\Table\UsersTable;
 use Cake\Http\Exception\BadRequestException;
 use Cake\Http\Exception\MethodNotAllowedException;
@@ -15,6 +16,7 @@ use DateTime;
 class AuthenticationController extends AppController
 {
     private UsersTable $Users;
+    private BlacklistedTokensTable $BlacklistedTokens;
 
     public function initialize(): void
     {
@@ -23,6 +25,7 @@ class AuthenticationController extends AppController
         $this->loadComponent('File');
 
         $this->Users = TableRegistry::getTableLocator()->get('Users');
+        $this->BlacklistedTokens = TableRegistry::getTableLocator()->get('BlacklistedTokens');
     }
 
     public function login()
@@ -72,7 +75,7 @@ class AuthenticationController extends AppController
         $image = $this->request->getData('profile_image');
         if ($image !== null)
             $user->addProfilePicture($image);
-        
+
         if (!$this->Users->save($user)) {
             throw new BadRequestException('Une erreur est survenue lors de la mise en ligne de l\'image');
         }
@@ -93,5 +96,24 @@ class AuthenticationController extends AppController
         unset($data['exp']);
 
         return $this->apiResponse($data);
+    }
+
+    /**
+     * Blacklists a user's token on logout.
+     */
+    public function logout()
+    {
+        if (!$this->request->is('get')) {
+            throw new MethodNotAllowedException('Utilisez une requête GET');
+        }
+
+        $token = $this->request->getSession()->read('token');
+        $blacklistedToken = $this->BlacklistedTokens->newEntity([
+            'expiration' => $this->Authentication->getTokenContent($token)['exp']
+        ]);
+        $blacklistedToken->token = $token;
+        $this->BlacklistedTokens->save($blacklistedToken);
+
+        return $this->apiResponse();
     }
 }
