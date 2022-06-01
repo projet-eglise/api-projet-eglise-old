@@ -19,9 +19,9 @@ use Cake\ORM\Entity;
  * @property string|null $response
  * @property string|null $file
  * @property string|null $trace
- * @property string|null $start_timestamp
- * @property string|null $end_timestamp
- * @property bool|null $viewed
+ * @property int $start_timestamp
+ * @property int $end_timestamp
+ * @property bool $viewed
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime|null $updated_at
  */

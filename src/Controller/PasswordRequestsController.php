@@ -68,7 +68,7 @@ class PasswordRequestsController extends AppController
     public function checkToken()
     {
         $passwordRequest = $this->PasswordRequests->findByToken($this->request->getParam('token'))->toArray();
-
+        // TODO Refacto
         if (count($passwordRequest) < 1) {
             throw new NotFoundException('Cette demande a expiré');
         }

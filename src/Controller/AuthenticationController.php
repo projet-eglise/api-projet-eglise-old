@@ -50,6 +50,8 @@ class AuthenticationController extends AppController
             throw new UnauthorizedException('Identifiants invalides');
         }
 
+        $this->log->user_id = $user->user_id;
+
         return $this->apiResponse(['token' => $this->Authentication->generateJwt($user)]);
     }
 

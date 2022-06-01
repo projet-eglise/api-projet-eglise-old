@@ -21,7 +21,7 @@ final class PE44Logout extends AbstractMigration
     {
         $blacklisted_tokens = $this->table('blacklisted_tokens', ['id' => 'blacklisted_token_id']);
         $blacklisted_tokens
-            ->addColumn('token', 'string')
+            ->addColumn('token', 'text')
             ->addColumn('expiration', 'integer')
             ->addTimestamps()
             ->create();

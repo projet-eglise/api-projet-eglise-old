@@ -68,7 +68,7 @@ class AppController extends Controller
 
         $this->log = $this->Logs->newEntity([
             'uid' => uniqid(),
-            'start_timestamp' => microtime(true),
+            'start_timestamp' => microtime(true) * 10000,
         ]);
     }
 
@@ -86,13 +86,8 @@ class AppController extends Controller
 
         $token = $this->request->getSession()->read('token');
         if (isset($token)) {
-            $user = $this->request->getSession()->read('user');
-
-            if (!isset($user))
-                $user = $this->Users->findByUid($this->Authentication->getTokenContent($token)['user']['uid'])->first();
-
-            $this->log->user_id = $user->user_id;
-            $this->connectedUser = $user;
+            $this->connectedUser = $this->Users->findByUid($this->Authentication->getTokenContent($token)['user']['uid'])->first();
+            $this->log->user_id = $this->connectedUser->user_id;
         } else {
             $this->request->getSession()->delete('user');
         }
@@ -136,20 +131,24 @@ class AppController extends Controller
         $response['code'] = $statusCode;
         $response['message'] = (new Response(['status' => $statusCode]))->getReasonPhrase();
 
-        $this->log->params = json_encode($this->getRequest()->getData());
+        $params = $this->getRequest()->getData() ?? [];
+        
+        if (isset($params['password']))
+            unset($params['password']);
+
+        $this->log->params = json_encode($params);
         $this->log->route = $this->getRequest()->getUri()->__toString();
         $this->log->method = $this->getRequest()->getMethod();
         $this->log->ip_address = $this->getRequest()->clientIp();
-        $this->log->end_timestamp = microtime(true);
+        $this->log->end_timestamp = microtime(true) * 10000;
         $this->log->response_code = $statusCode;
 
         if ($statusCode === 200) {
             $response = $this->okResponseBuilder($response, $data);
             $this->log->response = json_encode($data);
             $this->log->viewed = true;
-            $this->Logs->save($this->log);
         } else {
-            $this->log->trace = json_encode($data['traceback']);
+            $data['file'] = str_replace(ROOT . DS, '', $data['file']);
             $this->log->file = "{$data['file']}({$data['line']})";
             $this->log->viewed = false;
 
@@ -159,11 +158,11 @@ class AppController extends Controller
                 unset($data['line']);
             }
 
-            $this->log->response = json_encode($data);
-            $this->Logs->save($this->log);
-
             $response = $this->errorResponseBuilder($response, $data);
+            $this->log->response = json_encode($data);
         }
+
+        $this->Logs->save($this->log);
 
         $this->set($response);
 

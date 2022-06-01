@@ -106,18 +106,16 @@ class LogsTable extends Table
             ->allowEmptyString('trace');
 
         $validator
-            ->scalar('start_timestamp')
-            ->maxLength('start_timestamp', 255)
-            ->allowEmptyString('start_timestamp');
+            ->requirePresence('start_timestamp', 'create')
+            ->notEmptyString('start_timestamp');
 
         $validator
-            ->scalar('end_timestamp')
-            ->maxLength('end_timestamp', 255)
-            ->allowEmptyString('end_timestamp');
+            ->requirePresence('end_timestamp', 'create')
+            ->notEmptyString('end_timestamp');
 
         $validator
             ->boolean('viewed')
-            ->allowEmptyString('viewed');
+            ->notEmptyString('viewed');
 
         $validator
             ->dateTime('created_at')

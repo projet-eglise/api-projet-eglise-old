@@ -31,9 +31,9 @@ final class PE51ActionsLog extends AbstractMigration
             ->addColumn('response', 'text', ['default' => null, 'null' => true])
             ->addColumn('file', 'string', ['default' => null, 'null' => true])
             ->addColumn('trace', 'text', ['default' => null, 'null' => true])
-            ->addColumn('start_timestamp', 'string', ['default' => null, 'null' => true])
-            ->addColumn('end_timestamp', 'string', ['default' => null, 'null' => true])
-            ->addColumn('viewed', 'boolean', ['default' => null, 'null' => true])
+            ->addColumn('start_timestamp', 'biginteger')
+            ->addColumn('end_timestamp', 'biginteger')
+            ->addColumn('viewed', 'boolean', ['default' => false])
             ->addForeignKey('user_id', 'users', 'user_id', ['delete' => 'NO_ACTION', 'update' => 'NO_ACTION'])
             ->addTimestamps()
             ->create();
