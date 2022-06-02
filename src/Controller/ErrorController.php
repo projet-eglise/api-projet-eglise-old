@@ -57,12 +57,13 @@ class ErrorController extends AppController
     {
         parent::beforeRender($event);
         $viewBuilder = $event->getSubject()->viewBuilder();
+        $error = $viewBuilder->getVar('error');
 
         $data = [
-            'file' => $viewBuilder->getVar('file'),
-            'line' => $viewBuilder->getVar('line'),
+            'file' => $error->getFile(),
+            'line' => $error->getLine(),
             'error' => $viewBuilder->getVar('message'),
-            'traceback' => $viewBuilder->getVar('trace'),
+            'trace' => $error->getTrace(),
         ];
 
         $this->errorResponse($viewBuilder->getVar('code'), $data);

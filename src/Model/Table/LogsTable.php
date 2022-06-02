@@ -11,6 +11,9 @@ use Cake\Validation\Validator;
 /**
  * Logs Model
  *
+ * @property \App\Model\Table\UsersTable&\Cake\ORM\Association\BelongsTo $Users
+ * @property \App\Model\Table\ErrorLogsTable&\Cake\ORM\Association\BelongsTo $ErrorLogs
+ *
  * @method \App\Model\Entity\Log newEmptyEntity()
  * @method \App\Model\Entity\Log newEntity(array $data, array $options = [])
  * @method \App\Model\Entity\Log[] newEntities(array $data, array $options = [])
@@ -43,6 +46,9 @@ class LogsTable extends Table
 
         $this->belongsTo('Users', [
             'foreignKey' => 'user_id',
+        ]);
+        $this->belongsTo('ErrorLogs', [
+            'foreignKey' => 'error_log_id',
         ]);
     }
 
@@ -97,25 +103,12 @@ class LogsTable extends Table
             ->allowEmptyString('response');
 
         $validator
-            ->scalar('file')
-            ->maxLength('file', 255)
-            ->allowEmptyFile('file');
-
-        $validator
-            ->scalar('trace')
-            ->allowEmptyString('trace');
-
-        $validator
             ->requirePresence('start_timestamp', 'create')
             ->notEmptyString('start_timestamp');
 
         $validator
             ->requirePresence('end_timestamp', 'create')
             ->notEmptyString('end_timestamp');
-
-        $validator
-            ->boolean('viewed')
-            ->notEmptyString('viewed');
 
         $validator
             ->dateTime('created_at')
@@ -138,6 +131,7 @@ class LogsTable extends Table
     public function buildRules(RulesChecker $rules): RulesChecker
     {
         $rules->add($rules->existsIn('user_id', 'Users'), ['errorField' => 'user_id']);
+        // $rules->add($rules->existsIn('error_log_id', 'ErrorLogs'), ['errorField' => 'error_log_id']);
 
         return $rules;
     }

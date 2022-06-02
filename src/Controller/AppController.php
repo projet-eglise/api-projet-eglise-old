@@ -132,7 +132,7 @@ class AppController extends Controller
         $response['message'] = (new Response(['status' => $statusCode]))->getReasonPhrase();
 
         $params = $this->getRequest()->getData() ?? [];
-        
+
         if (isset($params['password']))
             unset($params['password']);
 
@@ -146,19 +146,28 @@ class AppController extends Controller
         if ($statusCode === 200) {
             $response = $this->okResponseBuilder($response, $data);
             $this->log->response = json_encode($data);
-            $this->log->viewed = true;
         } else {
-            $data['file'] = str_replace(ROOT . DS, '', $data['file']);
-            $this->log->file = "{$data['file']}({$data['line']})";
-            $this->log->viewed = false;
+            $this->log->error_log = $this->Logs->ErrorLogs->newEntity([
+                'uid' => uniqid(),
+                'file' => str_replace(ROOT . DS, '', $data['file']),
+                'line' => $data['line'],
+                'viewed' => false,
+                'traces' => [],
+                'error' => [
+                    'uid' => uniqid(),
+                    'code' => $statusCode,
+                    'error' => 'Bla bla bla bla',
+                ]
+            ]);
 
-            unset($data['traceback']);
-            if (Configure::read('debug')) {
-                unset($data['file']);
-                unset($data['line']);
+            foreach ($data['trace'] as $trace) {
+                $trace['file'] = str_replace(ROOT . DS, '', $trace['file']);
+                $this->log->error_log->traces[] = $this->Logs->ErrorLogs->Traces->newEntity(array_merge([
+                    'uid' => uniqid(),
+                ], $trace));
             }
 
-            $response = $this->errorResponseBuilder($response, $data);
+            $response = $this->errorResponseBuilder($response, ['error' => $data['error']]);
             $this->log->response = json_encode($data);
         }
 
