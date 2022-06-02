@@ -71,22 +71,18 @@ class AuthenticationControllerTest extends TestCase
         $token = $Authentication->getTokenContent($Authentication->generateJwt($user));
         unset($token['exp']);
 
-        $this->assertEquals(json_encode([
-            "user" => [
-                "uid" => '6265545515f21',
-                "is_admin" => true
-            ],
-            "churches" => [
-                [
-                    "uid" => "627041d90c74f",
-                    "name" => "ADD Dijon",
-                ],
-                [
-                    "uid" => "627041d90c752",
-                    "name" => "ADD Autun",
-                ],
-            ]
-        ]), json_encode($token));
+        $this->assertEquals('6265545515f21', $token['user']['uid']);
+        $this->assertTrue($token['user']['is_admin']);
+
+        $this->assertEquals(2, count($token['churches']));
+        foreach ($token['churches'] as $church) {
+            $hasOneEqual = false;
+
+            if ($church["uid"] === "627041d90c74f" && $church["name"] === "ADD Dijon" || $church["uid"] === "627041d90c752" && $church["name"] === "ADD Autun")
+                $hasOneEqual = true;
+
+            $this->assertTrue($hasOneEqual);
+        }
     }
 
     /**
@@ -139,9 +135,8 @@ class AuthenticationControllerTest extends TestCase
     {
         $Authentication = new AuthenticationComponent(new ComponentRegistry());
 
-        $user = $this->Users->findByEmail('timothe@hofmann.fr')->toArray();
         $this->ChurchUsers->delete($this->ChurchUsers->get(4));
-        $user = $this->Users->get($user[0]->user_id);
+        $user = $this->Users->findByEmail('timothe@hofmann.fr')->first();
 
         $token = $Authentication->generateJwt($user);
         $this->configRequest(['headers' => ['Authorization' => 'Bearer ' . $token]]);
@@ -150,19 +145,15 @@ class AuthenticationControllerTest extends TestCase
 
         $this->assertResponseOk();
 
-        $this->assertEquals(
-            json_encode(['code' => 200, "message" => "OK", "data" =>
-            [
-                "user" =>
-                [
-                    "uid" => "6265545515f21",
-                    "is_admin" => true
-                ],
-                "churches" => [
-                    ["uid" => "627041d90c74f", 'name' => 'ADD Dijon']
-                ]
-            ]], JSON_PRETTY_PRINT),
-            json_encode(json_decode((new BodyEquals($this->_response))->toStringBody()), JSON_PRETTY_PRINT)
-        );
+        $response = json_decode((string)$this->_response->getBody(), true);
+        $this->assertEquals(200, $response['code']);
+        $this->assertEquals("OK", $response['message']);
+
+        $this->assertEquals("6265545515f21", $response['data']['user']['uid']);
+        $this->assertTrue($response['data']['user']['is_admin']);
+
+        $this->assertEquals(1, count($response['data']['churches']));
+        $this->assertEquals('627041d90c74f', $response['data']['churches'][0]['uid']);
+        $this->assertEquals('ADD Dijon', $response['data']['churches'][0]['name']);
     }
 }
