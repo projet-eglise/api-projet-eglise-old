@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Model\Entity;
 
 use App\Interfaces\ApiRessource;
+use App\Model\Table\AddressesTable;
 use App\Model\Table\ChurchesTable;
 use App\Model\Table\ChurchUserRolesTable;
+use App\Model\Table\UsersTable;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
@@ -47,20 +49,25 @@ class Church extends Entity implements ApiRessource
     private $hydrated = [
         'mainAdministrator' => false,
         'mainPastor' => false,
+        'address' => false,
     ];
 
     private ?User $mainAdministrator;
     private ?User $mainPastor;
 
+    private AddressesTable $Addresses;
     private ChurchUserRolesTable $ChurchUserRoles;
     private ChurchesTable $Churches;
+    private UsersTable $Users;
 
     public function __construct(array $properties = [], array $options = [])
     {
         parent::__construct($properties, $options);
 
+        $this->Addresses = TableRegistry::getTableLocator()->get('Addresses');
         $this->ChurchUserRoles = TableRegistry::getTableLocator()->get('ChurchUserRoles');
         $this->Churches = TableRegistry::getTableLocator()->get('Churches');
+        $this->Users = TableRegistry::getTableLocator()->get('Users');
     }
 
     /**
@@ -68,14 +75,13 @@ class Church extends Entity implements ApiRessource
      */
     private function hydrateMainAdministrator()
     {
-        if (!$this->hydrated['mainAdministrator']) {
+        if (!$this->hydrated['mainAdministrator'] && !isset($this->mainAdministrator)) {
             if ($this->main_administrator_id !== null)
                 $this->mainAdministrator = $this->Users->get($this->main_administrator_id);
             else
                 $this->mainAdministrator = null;
-
-            $this->hydrated['mainAdministrator'] = true;
         }
+        $this->hydrated['mainAdministrator'] = true;
     }
 
     /**
@@ -83,14 +89,27 @@ class Church extends Entity implements ApiRessource
      */
     private function hydratePastor()
     {
-        if (!$this->hydrated['mainPastor']) {
+        if (!$this->hydrated['mainPastor'] && !isset($this->mainPastor)) {
             if ($this->pastor_id !== null)
                 $this->mainPastor = $this->Users->get($this->pastor_id);
             else
                 $this->mainPastor = null;
-
-            $this->hydrated['mainPastor'] = true;
         }
+        $this->hydrated['mainPastor'] = true;
+    }
+
+    /**
+     * Fills in the variable addres.
+     */
+    private function hydrateAddres()
+    {
+        if (!isset($this->addres)) {
+            if ($this->address_id !== null)
+                $this->addres = $this->Addresses->get($this->address_id);
+            else
+                $this->addres = null;
+        }
+        $this->hydrated['address'] = true;
     }
 
     /**
@@ -167,31 +186,35 @@ class Church extends Entity implements ApiRessource
      *
      * @return Church
      */
-    public function toApi(): Church
+    public function toApi(bool $withRelations = false): Church
     {
+        if ($withRelations) {
+            $this->hydrateMainAdministrator();
+            $this->hydratePastor();
+            $this->hydrateAddres();
+        }
+
         unset($this->church_id);
         unset($this->address_id);
         unset($this->pastor_id);
         unset($this->main_administrator_id);
         unset($this->created_at);
         unset($this->updated_at);
-
-        if (isset($this->main_administrator)) {
-            $this->main_administrator->toApi();
-        }
-
-        if (isset($this->pastor)) {
-            $this->pastor->toApi();
-        }
-
-        if (isset($this->addres)) {
-            $this->addres->toApi();
-        }
+        unset($this->pastor);
 
         $this->address = $this->addres;
         unset($this->addres);
-        unset($mainAdministrator);
-        unset($mainPastor);
+
+        if (isset($this->mainAdministrator)) {
+            $this->main_administrator = $this->mainAdministrator->toApi();
+        }
+
+        if (isset($this->mainPastor)) {
+            $this->pastor = $this->mainPastor->toApi();
+        }
+
+        if (isset($this->address))
+            $this->address->toApi();
 
         return $this;
     }

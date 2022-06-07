@@ -35,6 +35,21 @@ class ChurchesController extends AppController
     }
 
     /**
+     * Index method
+     *
+     * @return \Cake\Http\Response|null|void Renders view
+     */
+    public function index()
+    {
+        $churches = $this->Churches->find('all', ['order' => ['name' => 'ASC']])->toArray();
+
+        foreach ($churches as $church)
+            $church->toApi(true);
+
+        $this->apiResponse($churches);
+    }
+
+    /**
      * Returns the churches that a user can join.
      * @return void
      */

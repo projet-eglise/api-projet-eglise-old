@@ -82,6 +82,7 @@ return static function (RouteBuilder $routes) {
             
             $protectedRoutes->get('/logs', ['controller' => 'Logs', 'action' => 'index']);
             $protectedRoutes->get('/users', ['controller' => 'Users', 'action' => 'index']);
+            $protectedRoutes->get('/churches', ['controller' => 'Churches', 'action' => 'index']);
         });
 
 
