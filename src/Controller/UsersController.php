@@ -17,7 +17,6 @@ use Cake\ORM\TableRegistry;
  */
 class UsersController extends AppController
 {
-    private UsersTable $Users;
     private ChurchesTable $Churches;
 
     public function initialize(): void
@@ -26,6 +25,21 @@ class UsersController extends AppController
 
         $this->Users = TableRegistry::getTableLocator()->get('Users');
         $this->Churches = TableRegistry::getTableLocator()->get('Churches');
+    }
+
+    /**
+     * Index method
+     *
+     * @return \Cake\Http\Response|null|void Renders view
+     */
+    public function index()
+    {
+        $users = $this->Users->find('all', ['order' => ['firstname' => 'ASC', 'lastname' => 'ASC']])->toArray();
+
+        foreach ($users as $user)
+            $user->toApi();
+
+        $this->apiResponse($users);
     }
 
     /**
