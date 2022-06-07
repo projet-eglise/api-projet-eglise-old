@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Model\Entity;
 
 use App\Controller\Component\FileComponent;
+use App\Interfaces\ApiRessource;
 use App\Model\Table\ChurchesTable;
 use App\Model\Table\ChurchUserRolesTable;
 use App\Model\Table\ChurchUsersTable;
@@ -34,7 +35,7 @@ use Laminas\Diactoros\UploadedFile;
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime|null $updated_at
  */
-class User extends Entity
+class User extends Entity implements ApiRessource
 {
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().
@@ -333,6 +334,11 @@ class User extends Entity
 
 
         unset($this->user_id);
+        unset($this->email);
+        unset($this->password);
+        unset($this->phone_number);
+        unset($this->birthdate);
+        unset($this->has_profile_picture);
         unset($this->created_at);
         unset($this->updated_at);
         unset($this->roles);

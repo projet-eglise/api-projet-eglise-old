@@ -134,10 +134,10 @@ class AppController extends Controller
         $params = $this->getRequest()->getData() ?? [];
 
         if (isset($params['password']))
-            unset($params['password']);
+            $params['password'] = "********";
 
         $this->log->params = json_encode($params);
-        $this->log->route = $this->getRequest()->getUri()->__toString();
+        $this->log->route = $this->getRequest()->getUri()->getPath();
         $this->log->method = $this->getRequest()->getMethod();
         $this->log->ip_address = $this->getRequest()->clientIp();
         $this->log->end_timestamp = microtime(true) * 10000;
@@ -145,7 +145,12 @@ class AppController extends Controller
 
         if ($statusCode === 200) {
             $response = $this->okResponseBuilder($response, $data);
+            if ($this->log->method === "GET" && $this->log->route === "/logs")
+                $data = ["Array too recursive ^^"];
+            
             $this->log->response = json_encode($data);
+            if (json_last_error() !== 0)
+                $this->log->response = json_last_error_msg();
         } else {
             $this->log->error_log = $this->Logs->ErrorLogs->newEntity([
                 'uid' => uniqid(),
@@ -156,7 +161,7 @@ class AppController extends Controller
                 'error' => [
                     'uid' => uniqid(),
                     'code' => $statusCode,
-                    'error' => 'Bla bla bla bla',
+                    'error' => $this->viewBuilder()->getVar('error')->getMessage(),
                 ]
             ]);
 
@@ -168,7 +173,7 @@ class AppController extends Controller
             }
 
             $response = $this->errorResponseBuilder($response, ['error' => $data['error']]);
-            $this->log->response = json_encode($data);
+            $this->log->response = json_encode($response);
         }
 
         $this->Logs->save($this->log);

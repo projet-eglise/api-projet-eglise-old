@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Model\Entity;
 
+use App\Interfaces\ApiRessource;
 use App\Model\Table\RoleOptionsTable;
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
@@ -19,7 +20,7 @@ use Cake\ORM\TableRegistry;
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime|null $updated_at
  */
-class Role extends Entity
+class Role extends Entity implements ApiRessource
 {
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().

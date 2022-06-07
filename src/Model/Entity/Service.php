@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Model\Entity;
 
+use App\Interfaces\ApiRessource;
 use Cake\ORM\Entity;
 
 /**
@@ -14,7 +15,7 @@ use Cake\ORM\Entity;
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime|null $updated_at
  */
-class Service extends Entity
+class Service extends Entity implements ApiRessource
 {
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().

@@ -72,7 +72,10 @@ class AuthenticationControllerTest extends TestCase
         unset($token['exp']);
 
         $this->assertEquals('6265545515f21', $token['user']['uid']);
+        $this->assertEquals("Timothé", $token['user']['firstname']);
+        $this->assertEquals("HOFMANN", $token['user']['lastname']);
         $this->assertTrue($token['user']['is_admin']);
+        $this->assertEquals(5, count($token['user']));
 
         $this->assertEquals(2, count($token['churches']));
         foreach ($token['churches'] as $church) {
@@ -82,6 +85,9 @@ class AuthenticationControllerTest extends TestCase
                 $hasOneEqual = true;
 
             $this->assertTrue($hasOneEqual);
+            $this->assertEquals(4, count($church));
+            $this->assertFalse($church['hasAtLeastOneRole']);
+            $this->assertFalse($church['hasAtLeastOneRoleValidate']);
         }
     }
 
@@ -150,10 +156,16 @@ class AuthenticationControllerTest extends TestCase
         $this->assertEquals("OK", $response['message']);
 
         $this->assertEquals("6265545515f21", $response['data']['user']['uid']);
+        $this->assertEquals("Timothé", $response['data']['user']['firstname']);
+        $this->assertEquals("HOFMANN", $response['data']['user']['lastname']);
         $this->assertTrue($response['data']['user']['is_admin']);
+        $this->assertEquals(4, count($response['data']['user']));
 
         $this->assertEquals(1, count($response['data']['churches']));
         $this->assertEquals('627041d90c74f', $response['data']['churches'][0]['uid']);
         $this->assertEquals('ADD Dijon', $response['data']['churches'][0]['name']);
+        $this->assertEquals(5, count($response['data']['churches'][0]));
+        $this->assertFalse($response['data']['churches'][0]['hasAtLeastOneRole']);
+        $this->assertFalse($response['data']['churches'][0]['hasAtLeastOneRoleValidate']);
     }
 }

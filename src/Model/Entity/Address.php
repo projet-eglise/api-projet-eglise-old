@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Model\Entity;
 
+use App\Interfaces\ApiRessource;
 use Cake\ORM\Entity;
 
 /**
@@ -14,7 +15,7 @@ use Cake\ORM\Entity;
  * @property string $postal_code
  * @property string $city
  */
-class Address extends Entity
+class Address extends Entity implements ApiRessource
 {
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().

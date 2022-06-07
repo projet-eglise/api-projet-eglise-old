@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Model\Entity;
 
+use App\Interfaces\ApiRessource;
+use App\Model\Table\UsersTable;
 use Cake\ORM\Entity;
+use Cake\ORM\TableRegistry;
 
 /**
  * Log Entity
@@ -27,7 +30,7 @@ use Cake\ORM\Entity;
  * @property \App\Model\Entity\ErrorLog $error_log
  * @property \App\Model\Entity\User $user
  */
-class Log extends Entity
+class Log extends Entity implements ApiRessource
 {
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().
@@ -56,9 +59,28 @@ class Log extends Entity
         'user' => true,
     ];
 
-    protected function setUser(User $user) 
+    private UsersTable $Users;
+
+    public function __construct(array $properties = [], array $options = [])
     {
-        if($user->user_id !== null) $this->user_id = $user->user_id;
+        parent::__construct($properties, $options);
+        $this->Users = TableRegistry::getTableLocator()->get('Users');
+    }
+
+    /** 
+     * Hydrate the user attribute. 
+     * 
+     * @return void
+     */
+    private function hydrateUser(): void
+    {
+        if (!isset($this->user) && isset($this->user_id))
+            $this->user = $this->Users->get($this->user_id);
+    }
+
+    protected function setUser(User $user)
+    {
+        if ($user->user_id !== null) $this->user_id = $user->user_id;
         return $user;
     }
 
@@ -77,5 +99,27 @@ class Log extends Entity
             && $log->response === $this->response
             && $log->start_timestamp === $this->start_timestamp
             && $log->end_timestamp === $this->end_timestamp;
+    }
+
+    /**
+     * Unset the variables needed for an api return.
+     *
+     * @return Log
+     */
+    public function toApi(): Log
+    {
+        $this->hydrateUser();
+
+        if (isset($this->response) && !($this->response instanceof string) && $this->response !== "")
+            $this->response = stream_get_contents($this->response);
+        unset($this->log_id);
+        unset($this->error_log_id);
+        unset($this->user_id);
+        unset($this->created_at);
+        unset($this->updated_at);
+        if (isset($this->user))
+            $this->user->toApi();
+
+        return $this;
     }
 }

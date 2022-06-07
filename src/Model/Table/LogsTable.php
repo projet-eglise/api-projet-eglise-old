@@ -99,7 +99,6 @@ class LogsTable extends Table
             ->notEmptyString('response_code');
 
         $validator
-            ->scalar('response')
             ->allowEmptyString('response');
 
         $validator

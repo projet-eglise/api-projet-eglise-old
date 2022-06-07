@@ -48,7 +48,7 @@ final class PE51ActionsLog extends AbstractMigration
             ->addColumn('route', 'string')
             ->addColumn('params', 'text')
             ->addColumn('response_code', 'integer')
-            ->addColumn('response', 'text', ['default' => null, 'null' => true])
+            ->addColumn('response', 'blob', ['default' => null, 'null' => true])
             ->addColumn('start_timestamp', 'biginteger')
             ->addColumn('end_timestamp', 'biginteger')
             ->addForeignKey('user_id', 'users', 'user_id', ['delete' => 'CASCADE', 'update' => 'CASCADE'])

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Model\Entity;
 
+use App\Interfaces\ApiRessource;
 use App\Model\Table\ChurchesTable;
 use App\Model\Table\ChurchUserRolesTable;
-use Cake\Http\Exception\BadRequestException;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
@@ -23,7 +23,7 @@ use Cake\ORM\TableRegistry;
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime|null $updated_at
  */
-class Church extends Entity
+class Church extends Entity implements ApiRessource
 {
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().
@@ -176,15 +176,15 @@ class Church extends Entity
         unset($this->created_at);
         unset($this->updated_at);
 
-        if(isset($this->main_administrator)) {
+        if (isset($this->main_administrator)) {
             $this->main_administrator->toApi();
         }
 
-        if(isset($this->pastor)) {
+        if (isset($this->pastor)) {
             $this->pastor->toApi();
         }
 
-        if(isset($this->addres)) {
+        if (isset($this->addres)) {
             $this->addres->toApi();
         }
 
@@ -210,19 +210,17 @@ class Church extends Entity
         unset($this->created_at);
         unset($this->updated_at);
 
-        if(isset($this->main_administrator)) {
+        if (isset($this->main_administrator))
             $this->main_administrator->toApi();
-        }
 
-        if(isset($this->pastor)) {
+        if (isset($this->pastor))
             $this->pastor->toApi();
-        }
 
-        if(isset($this->addres)) {
-            $this->addres->toApi();
-        }
+        if (isset($this->addres))
+            $this->address = $this->addres->toApi();
+        else
+            unset($this->address);
 
-        $this->address = $this->addres;
         unset($this->addres);
         unset($mainAdministrator);
         unset($mainPastor);
