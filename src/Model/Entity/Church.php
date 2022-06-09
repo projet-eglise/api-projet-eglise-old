@@ -9,6 +9,7 @@ use App\Model\Table\AddressesTable;
 use App\Model\Table\ChurchesTable;
 use App\Model\Table\ChurchUserRolesTable;
 use App\Model\Table\UsersTable;
+use App\Traits\Hydrate;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
@@ -24,9 +25,15 @@ use Cake\ORM\TableRegistry;
  * @property int $address_id
  * @property \Cake\I18n\FrozenTime $created_at
  * @property \Cake\I18n\FrozenTime|null $updated_at
+ * 
+ * @property Address $address
+ * @property User $pastor
+ * @property User $main_administrator
  */
 class Church extends Entity implements ApiRessource
 {
+    use Hydrate;
+
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().
      *
@@ -44,21 +51,19 @@ class Church extends Entity implements ApiRessource
         'address_id' => true,
         'created_at' => true,
         'updated_at' => true,
+        'address' => true,
+        'pastor' => true,
+        'main_administrator' => true,
     ];
-
-    private $hydrated = [
-        'mainAdministrator' => false,
-        'mainPastor' => false,
-        'address' => false,
-    ];
-
-    private ?User $mainAdministrator;
-    private ?User $mainPastor;
 
     private AddressesTable $Addresses;
     private ChurchUserRolesTable $ChurchUserRoles;
     private ChurchesTable $Churches;
     private UsersTable $Users;
+
+    public ?User $main_administrator;
+    public ?User $pastor;
+    public ?Address $address;
 
     public function __construct(array $properties = [], array $options = [])
     {
@@ -70,46 +75,40 @@ class Church extends Entity implements ApiRessource
         $this->Users = TableRegistry::getTableLocator()->get('Users');
     }
 
+    public function setPastor(User $pastor): User
+    {
+        if ($pastor->user_id !== null) $this->pastor_id = $pastor->user_id;
+        return $pastor;
+    }
+
+    public function setMainAdministrator(User $admin): User
+    {
+        if ($admin->user_id !== null) $this->main_administrator_id = $admin->user_id;
+        return $admin;
+    }
+
     /**
      * Fills in the variable mainAdministrator.
      */
-    private function hydrateMainAdministrator()
+    private function retrieveMainAdministrator()
     {
-        if (!$this->hydrated['mainAdministrator'] && !isset($this->mainAdministrator)) {
-            if ($this->main_administrator_id !== null)
-                $this->mainAdministrator = $this->Users->get($this->main_administrator_id);
-            else
-                $this->mainAdministrator = null;
-        }
-        $this->hydrated['mainAdministrator'] = true;
+        return $this->Users->get($this->main_administrator_id);
     }
 
     /**
      * Fills in the variable pastor.
      */
-    private function hydratePastor()
+    private function retrievePastor()
     {
-        if (!$this->hydrated['mainPastor'] && !isset($this->mainPastor)) {
-            if ($this->pastor_id !== null)
-                $this->mainPastor = $this->Users->get($this->pastor_id);
-            else
-                $this->mainPastor = null;
-        }
-        $this->hydrated['mainPastor'] = true;
+        return $this->Users->get($this->pastor_id);
     }
 
     /**
-     * Fills in the variable addres.
+     * Fills in the variable address.
      */
-    private function hydrateAddres()
+    private function retrieveAddress()
     {
-        if (!isset($this->addres)) {
-            if ($this->address_id !== null)
-                $this->addres = $this->Addresses->get($this->address_id);
-            else
-                $this->addres = null;
-        }
-        $this->hydrated['address'] = true;
+        return $this->Addresses->get($this->address_id);
     }
 
     /**
@@ -120,7 +119,7 @@ class Church extends Entity implements ApiRessource
      */
     public function addMainAdministrator(User $user, bool $validate = false)
     {
-        $this->hydrateMainAdministrator();
+        $this->hydrate('main_administrator');
 
         if ($this->mainAdministrator !== null) {
             throw new InternalErrorException('Un administrateur principal est déjà affecté à cet Eglise');
@@ -155,7 +154,7 @@ class Church extends Entity implements ApiRessource
      */
     public function addPastor(User $user)
     {
-        $this->hydratePastor();
+        $this->hydrate('pastor');
 
         if ($this->mainPastor !== null) {
             throw new InternalErrorException('Un pasteur est déjà affecté à cet Eglise');
@@ -189,9 +188,9 @@ class Church extends Entity implements ApiRessource
     public function toApi(bool $withRelations = false): Church
     {
         if ($withRelations) {
-            $this->hydrateMainAdministrator();
-            $this->hydratePastor();
-            $this->hydrateAddres();
+            $this->hydrate('main_administrator');
+            $this->hydrate('pastor');
+            $this->hydrate('address');
         }
 
         unset($this->church_id);
@@ -201,9 +200,6 @@ class Church extends Entity implements ApiRessource
         unset($this->created_at);
         unset($this->updated_at);
         unset($this->pastor);
-
-        $this->address = $this->addres;
-        unset($this->addres);
 
         if (isset($this->mainAdministrator)) {
             $this->main_administrator = $this->mainAdministrator->toApi();

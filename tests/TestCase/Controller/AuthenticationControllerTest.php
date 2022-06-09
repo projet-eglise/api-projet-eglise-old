@@ -85,7 +85,7 @@ class AuthenticationControllerTest extends TestCase
                 $hasOneEqual = true;
 
             $this->assertTrue($hasOneEqual);
-            $this->assertEquals(4, count($church));
+            $this->assertEquals(5, count($church));
             $this->assertFalse($church['hasAtLeastOneRole']);
             $this->assertFalse($church['hasAtLeastOneRoleValidate']);
         }
@@ -159,7 +159,7 @@ class AuthenticationControllerTest extends TestCase
         $this->assertEquals("Timothé", $response['data']['user']['firstname']);
         $this->assertEquals("HOFMANN", $response['data']['user']['lastname']);
         $this->assertTrue($response['data']['user']['is_admin']);
-        $this->assertEquals(4, count($response['data']['user']));
+        $this->assertEquals(5, count($response['data']['user']));
 
         $this->assertEquals(1, count($response['data']['churches']));
         $this->assertEquals('627041d90c74f', $response['data']['churches'][0]['uid']);
