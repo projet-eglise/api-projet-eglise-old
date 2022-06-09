@@ -112,62 +112,18 @@ class ChurchesController extends AppController
             'has_profile_picture' => false,
         ]);
 
-        $pastorUser = $this->Users->findByEmail($pastor->email)->first();
-
-        $pastorIsAdmin = isset($pastorUser) && $pastorUser->email === $this->connectedUser->email;
-        if (isset($pastorUser) && !$pastorIsAdmin)
-            throw new BadRequestException('Cette adresse mail est déjà affectée à un compte.');
-
-        $pastor = $pastorIsAdmin ? $pastorUser : $pastor;
-
         $church = $this->Churches->newEntity([
             'uid' => uniqid(),
             'name' => $this->request->getData('church_name'),
+            'address' => [
+                'uid' => uniqid(),
+                'address' => $this->request->getData('church_address'),
+                'postal_code' => $this->request->getData('church_postal_code'),
+                'city' => $this->request->getData('church_city'),
+            ],
         ]);
 
-        $churchAddress = $this->Addresses->newEntity([
-            'uid' => uniqid(),
-            'address' => $this->request->getData('church_address'),
-            'postal_code' => $this->request->getData('church_postal_code'),
-            'city' => $this->request->getData('church_city'),
-        ]);
-
-        if (!$pastorIsAdmin) {
-            if (!$this->Users->save($pastor, ['checkRules' => false])) {
-                $errors = $pastor->getErrors();
-                if (empty($errors))
-                    throw new BadRequestException('Une erreur est survenue lors de l\'enregistrement');
-
-                $field = reset($errors);
-                throw new BadRequestException(reset($field));
-            }
-        }
-
-        if (!$this->Addresses->save($churchAddress, ['associated' => false])) {
-            $errors = $churchAddress->getErrors();
-            if (empty($errors))
-                throw new BadRequestException('Une erreur est survenue lors de l\'enregistrement');
-
-            $field = reset($errors);
-            throw new BadRequestException(reset($field));
-        }
-
-        $church->address_id = $churchAddress->address_id;
-
-        if (!$this->Churches->save($church, ['associated' => false])) {
-            $errors = $church->getErrors();
-            if (empty($errors))
-                throw new BadRequestException('Une erreur est survenue lors de l\'enregistrement');
-
-            $field = reset($errors);
-            throw new BadRequestException(reset($field));
-        }
-
-        $this->connectedUser->joinChurch($church);
-        $church->addMainAdministrator($this->connectedUser, true);
-
-        $pastor->joinChurch($church);
-        $church->addPastor($pastor);
+        $church = $this->Churches->create($church, $this->connectedUser, $pastor);
 
         return $this->view($church->uid);
     }

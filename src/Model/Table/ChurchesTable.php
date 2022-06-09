@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
+use App\Model\Entity\Church;
 use App\Model\Entity\User;
+use Cake\Http\Exception\BadRequestException;
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
@@ -69,9 +71,10 @@ class ChurchesTable extends Table
         ]);
 
         $this->belongsTo('Address', [
+            'className' => 'Addresses',
+            'propertyName' => 'address',
             'foreignKey' => 'address_id',
             'joinType' => 'INNER',
-            'className' => 'Addresses',
         ]);
 
         $this->ChurchUsers = TableRegistry::getTableLocator()->get('ChurchUsers');
@@ -156,5 +159,35 @@ class ChurchesTable extends Table
                 "church_id NOT IN (" . implode(", ", $myChurches) . ")"
             ] : [])
             ->toArray();
+    }
+
+    public function create(Church $church, User $admin, User $pastor): Church
+    {
+        $existingPastor = $this->Users->findByEmail($pastor->email)->first();
+        $pastorIsAdmin = isset($existingPastor) && $existingPastor->email === $this->connectedUser->email;
+        if (isset($existingPastor) && !$pastorIsAdmin)
+            throw new BadRequestException('Cette adresse mail est déjà affectée à un compte.');
+
+        $church->setPastor($pastor);
+        $church->setMainAdministrator($admin);
+
+        if (!$this->save($church)) {
+            $errors = $church->getErrors();
+            if (empty($errors))
+                throw new BadRequestException('Une erreur est survenue lors de l\'enregistrement');
+
+            $field = reset($errors);
+            throw new BadRequestException(reset($field));
+        }
+
+        $pastor = $church->pastor;
+
+        $this->connectedUser->joinChurch($church);
+        $church->addMainAdministrator($this->connectedUser, true);
+
+        $pastor->joinChurch($church);
+        $church->addPastor($pastor);
+
+        return $church;
     }
 }
